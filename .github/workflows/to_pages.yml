@@ -36,7 +36,7 @@ jobs:
         personal_token: ${{ secrets.PAT_TOKEN }}
         external_repository: OpensourceKD/ng-mfe-pokemon
         publish_branch: main
-        publish_dir: ./dist
+        publish_dir: ./dist/pokemon
 
 
     # - name: Build and Deploy Shell App
