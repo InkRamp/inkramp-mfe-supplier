@@ -3,7 +3,7 @@
 	"version": 1,
 	"newProjectRoot": "projects",
 	"projects": {
-		"pokemon": {
+		"2pokemon": {
 			"projectType": "application",
 			"schematics": {
 				"@schematics/angular:component": {
@@ -17,7 +17,7 @@
 				"build": {
 					"builder": "ngx-build-plus:browser",
 					"options": {
-						"outputPath": "dist/pokemon",
+						"outputPath": "dist/2pokemon",
 						"index": "src/index.html",
 						"polyfills": [
 							"zone.js"
@@ -65,24 +65,24 @@
 					"builder": "ngx-build-plus:dev-server",
 					"configurations": {
 						"production": {
-							"buildTarget": "pokemon:build:production",
+							"buildTarget": "2pokemon:build:production",
 							"extraWebpackConfig": "webpack.prod.config.js"
 						},
 						"development": {
-							"buildTarget": "pokemon:build:development"
+							"buildTarget": "2pokemon:build:development"
 						}
 					},
 					"defaultConfiguration": "development",
 					"options": {
-						"port": 4101,
-						"publicHost": "http://localhost:4101",
+						"port": 4102,
+						"publicHost": "http://localhost:4102",
 						"extraWebpackConfig": "webpack.config.js"
 					}
 				},
 				"extract-i18n": {
 					"builder": "ngx-build-plus:extract-i18n",
 					"options": {
-						"buildTarget": "pokemon:build",
+						"buildTarget": "2pokemon:build",
 						"extraWebpackConfig": "webpack.config.js"
 					}
 				},
