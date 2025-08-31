@@ -2,7 +2,7 @@ const { shareAll, withModuleFederationPlugin } = require('@angular-architects/mo
 
 module.exports = withModuleFederationPlugin({
 
-  name: '2pokemon',
+  name: 'pokemon',
 
   exposes: {
     './Component': './src/app/app.component.ts',
