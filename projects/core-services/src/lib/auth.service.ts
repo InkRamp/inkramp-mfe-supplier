@@ -5,10 +5,10 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class AuthService {
-  id = 'auth of shellsa';
+  id = 'auth of pokemon';
 
   constructor(){
-    console.log("In constructor of auth service in shell")
+    console.log("In constructor of auth service in pokemon")
   }
 
   login(user: string) {
