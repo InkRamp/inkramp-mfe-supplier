@@ -36,7 +36,7 @@ jobs:
       uses: peaceiris/actions-gh-pages@v3
       with:
         personal_token: ${{ secrets.PAT_TOKEN }}
-        external_repository: OpensourceKD/ng-mfe-pokemon
+        external_repository: OpensourceKD/pokemon
         publish_branch: main
         publish_dir: ./dist/pokemon
 
