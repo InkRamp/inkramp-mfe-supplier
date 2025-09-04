@@ -25,7 +25,7 @@ jobs:
             rm -rf node_modules package-lock.json
             npm i
             #npm run build -- --output-path=dist/angular-poc-shell/browser
-            npm run build -- --configuration production --base-href "/ng-mfe-pokemon/"
+            npm run build -- --configuration production --base-href "/pokemon/"
             #npm run build
 
     - name: Debug dist
