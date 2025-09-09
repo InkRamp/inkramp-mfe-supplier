@@ -8,8 +8,15 @@ module.exports = withModuleFederationPlugin({
     './Component': './src/app/app.component.ts',
   },
 
+  // shared: {
+  //   ...shareAll({ singleton: true, strictVersion: true, requiredVersion: 'auto' }),
+  // },
   shared: {
-    ...shareAll({ singleton: true, strictVersion: true, requiredVersion: 'auto' }),
+    '@angular/core': { singleton: true, strictVersion: false, requiredVersion: 'auto' },
+    '@angular/common': { singleton: true, strictVersion: false, requiredVersion: 'auto' },
+    '@angular/common/http': { singleton: true, strictVersion: false, requiredVersion: 'auto' },
+    '@org/core-services': { singleton: true, strictVersion: true, requiredVersion: 'auto' }
+    // leave out @angular/router if the remote doesn't need it
   },
 
 });
