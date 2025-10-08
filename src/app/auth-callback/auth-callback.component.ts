@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, Params } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '@org/core-services';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-auth-callback',
@@ -34,23 +35,35 @@ export class AuthCallbackComponent implements OnInit {
   ) {}
 
   async ngOnInit(): Promise<void> {
-    this.route.queryParams.subscribe(async params => {
-      const code = params.get('code');
-      const state = params['state'];
-      const error = params['error'];
+    // Use window.location.search for hash-based routing fallback
+    let code: string | null = null;
+    let state: string | null = null;
+    let error: string | null = null;
 
-      console.log("Waka moko params and code are ...",params," ..... ", code)
+    // Try Angular queryParams first
+    const params:Params = await firstValueFrom(this.route.queryParams);
+    if (params && Object.keys(params).length > 0) {
+      code = params['code'] ?? null;
+      state = params['state'] ?? null;
+      error = params['error'] ?? null;
+    } else {
+      // Fallback for hash-based routing: parse window.location.search
+      const urlParams = new URLSearchParams(window.location.search);
+      code = urlParams.get('code');
+      state = urlParams.get('state');
+      error = urlParams.get('error');
+    }
 
-      if (error) {
-        this.message = `Authentication failed: ${error}`;
-        this.isProcessing = false;
-        setTimeout(() => this.router.navigate(['/']), 3000);
-        return;
-      }
+    if (error) {
+      this.message = `Authentication failed: ${error}`;
+      this.isProcessing = false;
+      setTimeout(() => this.router.navigate(['/']), 3000);
+      return;
+    }
 
-      if (code && state) {
+    if (code && state) {
+      try {
         const success = await this.authService.handleCallback(code, state);
-        
         if (success) {
           this.message = 'Authentication successful! Redirecting...';
           this.isProcessing = false;
@@ -60,12 +73,16 @@ export class AuthCallbackComponent implements OnInit {
           this.isProcessing = false;
           setTimeout(() => this.router.navigate(['/']), 3000);
         }
-      } else {
-        this.message = 'Invalid callback parameters. Redirecting...';
+      } catch (e) {
+        this.message = 'Authentication failed (exception). Redirecting...';
         this.isProcessing = false;
         setTimeout(() => this.router.navigate(['/']), 3000);
       }
-    });
+    } else {
+      this.message = 'Invalid callback parameters. Redirecting...';
+      this.isProcessing = false;
+      setTimeout(() => this.router.navigate(['/']), 3000);
+    }
   }
 }
 
