@@ -23,9 +23,9 @@ export class AuthService {
   id = 'auth of pokemon';
 
   // Zitadel configuration
-  private readonly ISSUER_BASE_URL = 'https://your-tenant.zitadel.cloud';
-  private readonly CLIENT_ID = 'zitadel-client-id';
-  private readonly REDIRECT_URI = 'http://localhost:4200/auth-callback';
+  private readonly ISSUER_BASE_URL = 'https://5jce9j8ted.execute-api.us-east-1.amazonaws.com';
+  private readonly CLIENT_ID = '336777344075263315';
+  private readonly REDIRECT_URI = 'https://opensourcekd.github.io/pokemon/auth-callback';
   private readonly SCOPE = 'openid profile email';
   private readonly TOKEN_KEY = 'zitadel_token';
   private readonly USER_INFO_KEY = 'zitadel_user_info';
