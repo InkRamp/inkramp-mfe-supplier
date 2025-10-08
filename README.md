@@ -60,6 +60,63 @@ exisiting services. Make necessary assumptions and take scenarios from bankking 
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.17.
 
+## Zitadel OIDC Authentication
+
+This application implements Zitadel OIDC login for authentication.
+
+### Configuration
+
+The authentication settings are configured in `projects/core-services/src/lib/auth.service.ts`:
+
+- **ISSUER_BASE_URL**: `https://your-tenant.zitadel.cloud`
+- **CLIENT_ID**: `zitadel-client-id`
+- **REDIRECT_URI**: `http://localhost:4200/auth-callback`
+- **SCOPE**: `openid profile email`
+
+### Setup Instructions
+
+1. **Configure Zitadel**: 
+   - Create an application in your Zitadel instance
+   - Set the redirect URI to `http://localhost:4200/auth-callback`
+   - Copy your Client ID
+
+2. **Update Configuration**:
+   - Open `projects/core-services/src/lib/auth.service.ts`
+   - Replace `ISSUER_BASE_URL` with your Zitadel tenant URL
+   - Replace `CLIENT_ID` with your application's client ID
+
+3. **Run the Application**:
+   ```bash
+   npm install
+   ng serve
+   ```
+
+4. **Login**:
+   - Navigate to `http://localhost:4200`
+   - Click the "Login with Zitadel" button in the header
+   - You'll be redirected to Zitadel for authentication
+   - After successful login, you'll be redirected back to the app
+   - Your user information will be displayed in the header
+
+### Features
+
+- **Login**: Click "Login with Zitadel" to authenticate
+- **Logout**: Click "Logout" to clear session
+- **User Info**: Displays authenticated user's name or email in the header
+- **JWT Storage**: Access token is stored in localStorage
+- **Auth State**: Observable user state available via `AuthService.user$`
+
+### API
+
+The `AuthService` provides the following methods:
+
+- `login()`: Initiates OIDC login flow
+- `logout()`: Clears authentication state
+- `getToken()`: Returns the stored JWT token
+- `isAuthenticated()`: Returns true if user is authenticated
+- `getUser()`: Returns current user information
+- `user$`: Observable of user state changes
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
