@@ -1,3 +1,118 @@
+
+-------------------------------------- REGARDING PIPELINES --------------------------------
+
+---
+
+# Understanding `single-commit: true` in `JamesIves/github-pages-deploy-action`
+
+Excellent question 👏 — this one trips a lot of people up because it’s not always obvious what `single-commit: true` does in **`JamesIves/github-pages-deploy-action`**.
+
+Let’s break it down clearly 👇
+
+---
+
+### 🧩 The purpose of `single-commit: true`
+
+Normally, every time you deploy with the action, it:
+
+* Commits the new build (e.g. `Update MFE build`)
+* Pushes that commit to your target branch (e.g. `main` or `gh-pages`)
+
+Over time, you’ll accumulate **many commits** — one per deploy — which can make the branch’s history heavy or messy.
+
+`single-commit: true` changes that behavior:
+
+> It keeps **only one commit** in the target branch, overwriting it every time you deploy.
+
+---
+
+### ⚙️ What actually happens
+
+When `single-commit: true` is set:
+
+1. The action checks out your target branch.
+2. It **removes all previous history** (resets to an empty branch).
+3. It commits your current deployment as **a single commit**.
+4. Pushes it forcefully (`--force`).
+
+So your Pages branch (e.g., `main` or `gh-pages`) will always have:
+
+* **One commit total**
+* Containing only the latest build artifacts
+* No incremental history or diffs
+
+---
+
+### ✅ Pros
+
+| Benefit                            | Description                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------------- |
+| 🧹 Clean history                   | Keeps your `gh-pages` or `main` branch free of thousands of deployment commits. |
+| 🚀 Faster pushes                   | No growing repo size from accumulating commits.                                 |
+| 🔒 Safe for binary-heavy artifacts | Prevents bloated git history.                                                   |
+| 🧠 Simpler to roll back            | You only ever see the latest deployed state.                                    |
+
+---
+
+### ⚠️ Cons
+
+| Limitation              | Why it matters                                                  |
+| ----------------------- | --------------------------------------------------------------- |
+| ❌ No deployment history | You can’t see previous deploy commits or diffs.                 |
+| ❌ Force pushes          | Each deploy overwrites the branch; concurrent deploys may race. |
+| 🕰️ No rollback         | You can’t easily revert to an earlier deployment version.       |
+
+---
+
+### 🧭 When to use it
+
+✅ **Use `single-commit: true` when:**
+
+* You treat your Pages repo/branch purely as a *build artifact bucket*.
+* You don’t need version history of static builds.
+* You want to minimize branch clutter (especially for `gh-pages`).
+
+🚫 **Avoid it if:**
+
+* You want to keep each deployment’s commit (e.g., for auditing or rollback).
+* You have multiple workflows pushing to the same branch concurrently (they may overwrite each other).
+
+---
+
+### 🧱 Typical config example
+
+```yaml
+- name: Deploy Pokémon MFE
+  uses: JamesIves/github-pages-deploy-action@v4
+  with:
+    branch: main
+    folder: ./dist/pokemon
+    repository-name: OpensourceKD/all-mfe-builds
+    token: ${{ secrets.PAT_TOKEN }}
+    target-folder: pokemon
+    clean: false
+    single-commit: true   # 👈 keeps just one commit, overwriting previous
+```
+
+---
+
+### ✅ TL;DR
+
+| Setting                          | Effect                                                                                  |
+| -------------------------------- | --------------------------------------------------------------------------------------- |
+| `single-commit: false` (default) | Adds a new commit each deployment (keeps history)                                       |
+| `single-commit: true`            | Force-pushes one commit, erasing history — always one clean commit in the target branch |
+
+---
+
+If you’re using this shared `all-mfe-builds` repo for **multiple MFEs**,
+👉 **don’t enable `single-commit`** — otherwise each deploy could erase the previous MFE’s folder history (since the branch history is replaced).
+
+Instead, keep it `false` (default) and use `clean: false` — that ensures each MFE updates only its folder without nuking others.
+
+---
+
+
 -------------------------------------- HOST --------------------------------
 ng new shell --routing --style=scss
 cd shell 
