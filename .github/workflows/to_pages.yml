@@ -33,13 +33,24 @@ jobs:
       run: ls -R dist
 
 
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+    # - name: Deploy to OpensourceKD/pokemon
+    #   uses: peaceiris/actions-gh-pages@v3
+    #   with:
+    #     personal_token: ${{ secrets.PAT_TOKEN }}
+    #     external_repository: OpensourceKD/pokemon
+    #     publish_branch: main
+    #     publish_dir: ./dist/pokemon
+    
+    - name: Deploy Pokémon MFE to all-mfe-builds repo
+      uses: JamesIves/github-pages-deploy-action@v4
       with:
-        personal_token: ${{ secrets.PAT_TOKEN }}
-        external_repository: OpensourceKD/pokemon
-        publish_branch: main
-        publish_dir: ./dist/pokemon
+        branch: main
+        folder: ./dist/pokemon
+        repository-name: OpensourceKD/all-mfe-builds
+        token: ${{ secrets.PAT_TOKEN }}
+        target-folder: pokemon        # 👈 deploys into /pokemon/ subfolder
+        clean: false                  # 👈 preserves other MFEs
+
 
 
     # - name: Build and Deploy Shell App
