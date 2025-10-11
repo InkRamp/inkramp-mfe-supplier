@@ -1,0 +1,266 @@
+@import '../../styles/tokens';
+@import '../../styles/mixins';
+
+.sales-history-container {
+  padding: $spacing-xl;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  .header {
+    margin-bottom: $spacing-xl;
+
+    h1 {
+      color: $gray-900;
+      margin-bottom: $spacing-sm;
+    }
+
+    .subtitle {
+      color: $gray-600;
+      font-size: $font-size-base;
+    }
+  }
+
+  .user-selector {
+    @include card;
+    margin-bottom: $spacing-xl;
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+
+    label {
+      font-weight: $font-weight-medium;
+      color: $gray-700;
+      white-space: nowrap;
+    }
+
+    select {
+      flex: 1;
+      padding: $spacing-sm $spacing-md;
+      border: 1px solid $gray-300;
+      border-radius: $border-radius-md;
+      font-size: $font-size-base;
+      background-color: $white;
+      cursor: pointer;
+      transition: $transition-base;
+
+      &:hover {
+        border-color: $primary-color;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+      }
+    }
+  }
+
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: $spacing-lg;
+    margin-bottom: $spacing-xl;
+
+    .summary-card {
+      @include card;
+      display: flex;
+      align-items: center;
+      gap: $spacing-md;
+      transition: $transition-base;
+
+      &:hover {
+        box-shadow: $shadow-lg;
+        transform: translateY(-2px);
+      }
+
+      .card-icon {
+        font-size: 2.5rem;
+        width: 60px;
+        height: 60px;
+        @include flex-center;
+        border-radius: $border-radius-lg;
+        flex-shrink: 0;
+
+        &.completed {
+          background-color: rgba($success-color, 0.1);
+        }
+
+        &.commission {
+          background-color: rgba($primary-color, 0.1);
+        }
+
+        &.info {
+          background-color: rgba($info-color, 0.1);
+        }
+
+        &.warning {
+          background-color: rgba($warning-color, 0.1);
+        }
+
+        &.danger {
+          background-color: rgba($danger-color, 0.1);
+        }
+      }
+
+      .card-content {
+        flex: 1;
+
+        .card-label {
+          font-size: $font-size-sm;
+          color: $gray-600;
+          margin-bottom: $spacing-xs;
+        }
+
+        .card-value {
+          font-size: $font-size-xl;
+          font-weight: $font-weight-bold;
+          color: $gray-900;
+        }
+      }
+    }
+  }
+
+  .loading {
+    @include flex-center;
+    flex-direction: column;
+    padding: $spacing-2xl;
+    color: $gray-600;
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid $gray-200;
+      border-top-color: $primary-color;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: $spacing-md;
+    }
+  }
+
+  .sales-table-container {
+    @include card;
+    overflow-x: auto;
+    @include scrollbar;
+
+    .sales-table {
+      width: 100%;
+      border-collapse: collapse;
+
+      thead {
+        background-color: $gray-100;
+
+        tr {
+          border-bottom: 2px solid $gray-300;
+        }
+
+        th {
+          padding: $spacing-md;
+          text-align: left;
+          font-weight: $font-weight-semibold;
+          color: $gray-700;
+          font-size: $font-size-sm;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+      }
+
+      tbody {
+        tr {
+          border-bottom: 1px solid $gray-200;
+          transition: $transition-fast;
+
+          &:hover {
+            background-color: $gray-100;
+          }
+
+          &:last-child {
+            border-bottom: none;
+          }
+        }
+
+        td {
+          padding: $spacing-md;
+          color: $gray-800;
+          font-size: $font-size-sm;
+
+          &.amount,
+          &.commission {
+            font-weight: $font-weight-medium;
+            font-family: 'Courier New', monospace;
+          }
+
+          &.amount {
+            color: $gray-900;
+          }
+
+          &.commission {
+            color: $success-color;
+          }
+
+          .status-badge {
+            display: inline-block;
+            padding: $spacing-xs $spacing-sm;
+            border-radius: $border-radius-xl;
+            font-size: 0.75rem;
+            font-weight: $font-weight-medium;
+            text-transform: capitalize;
+
+            &.status-completed {
+              background-color: rgba($success-color, 0.1);
+              color: darken($success-color, 10%);
+            }
+
+            &.status-pending {
+              background-color: rgba($warning-color, 0.1);
+              color: darken($warning-color, 20%);
+            }
+
+            &.status-cancelled {
+              background-color: rgba($danger-color, 0.1);
+              color: darken($danger-color, 10%);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .empty-state {
+    @include card;
+    @include flex-center;
+    flex-direction: column;
+    padding: $spacing-2xl;
+    text-align: center;
+
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: $spacing-lg;
+      opacity: 0.5;
+    }
+
+    h2 {
+      color: $gray-700;
+      margin-bottom: $spacing-sm;
+    }
+
+    p {
+      color: $gray-600;
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@include responsive(md) {
+  .sales-history-container {
+    padding: $spacing-md;
+
+    .summary-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+}
