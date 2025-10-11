@@ -171,9 +171,80 @@ do take this angle into account as well. You see its quite possible that current
 exisiting services. Make necessary assumptions and take scenarios from bankking domain. 
 
 
-# Pokemon
+# mfe-MY_SALES
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.17.
+This micro-frontend application provides sales history and performance tracking functionality for sales executives, team leads, and administrators.
+
+## Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Build core-services library
+npm run ng build core-services
+
+# Serve locally
+npm start
+# App runs at http://localhost:4101
+
+# Build for production
+npm run build
+
+# Run tests
+npm test
+```
+
+## Features
+
+- 📊 **Sales History Dashboard**: View detailed sales records with filtering
+- 👥 **Role-Based Access**: Different views for admins, team leads, and sales executives
+- 📱 **Responsive Design**: Works on desktop and mobile devices
+- 🎨 **Shared Design System**: Consistent styling with design tokens and mixins
+- 🔄 **Module Federation**: Works standalone or as part of a larger shell application
+
+## Documentation
+
+For detailed documentation, see [MFE_DOCUMENTATION.md](./MFE_DOCUMENTATION.md)
+
+## Architecture
+
+This MFE uses:
+- Angular 18
+- Module Federation for micro-frontend architecture
+- Zitadel for authentication
+- RxJS for reactive programming
+- SCSS with shared tokens for styling
+
+## Key Components
+
+- **SalesHistoryComponent**: Main component displaying sales data
+- **RoleService**: Manages user roles and permissions
+- **SalesDataService**: Provides sales data with filtering
+- **AuthService**: Handles Zitadel OIDC authentication
+
+## Project Structure
+
+```
+mfe-MY_SALES/
+├── src/
+│   ├── app/                    # Application components
+│   ├── styles/                 # Shared SCSS tokens and mixins
+│   └── styles.scss            # Global styles
+├── projects/
+│   └── core-services/         # Shared services library
+├── MFE_DOCUMENTATION.md       # Detailed documentation
+└── README.md                  # This file
+```
+
+## Development Notes
+
+- Follows SOLID, DRY, and YAGNI principles
+- Uses dummy data for demonstration (to be replaced with API calls)
+- Designed to work with shell application using dynamic module loading
+- Supports future brand-specific deployments
+
+---
 
 ## Zitadel OIDC Authentication
 
