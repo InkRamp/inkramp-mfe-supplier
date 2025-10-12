@@ -52,10 +52,10 @@ Implemented comprehensive RBAC system with four roles:
    - Future: Replace SalesDataService with actual API calls
 
 2. **User Authentication**
-   - Assumption: Zitadel authentication is handled by shell
-   - Implementation: Basic AuthService inherited from original codebase
+   - Assumption: Authentication will be handled via API in the future
+   - Implementation: Basic AuthService placeholder created
    - Default User: Alice Sales (Sales Executive) for testing
-   - Future: Integrate with actual Zitadel user context from shell
+   - Future: Integrate with authentication system via API
 
 3. **Data Structure**
    - Assumption: Sales records have consistent structure across brands
@@ -113,7 +113,7 @@ Implemented comprehensive RBAC system with four roles:
 **Why separate RoleService and AuthService?**
 - Separation of concerns (SOLID - Single Responsibility)
 - RoleService: Business logic for permissions
-- AuthService: Infrastructure concern for authentication
+- AuthService: Placeholder for future authentication implementation
 - Allows independent evolution of both concerns
 
 **Why dummy data in service instead of separate file?**
@@ -188,7 +188,7 @@ Implemented comprehensive RBAC system with four roles:
 ### With Shell Application
 
 1. **Authentication**
-   - Shell passes user context to MFE
+   - Authentication will be handled via API in the future
    - MFE uses RoleService to check permissions
    - Shared @org/core-services ensures singleton
 
