@@ -1,0 +1,96 @@
+// Common mixins for MFE Applications
+
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@mixin card {
+  background: $white;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-md;
+  padding: $spacing-lg;
+}
+
+@mixin button-base {
+  padding: $spacing-sm $spacing-lg;
+  border-radius: $border-radius-md;
+  font-weight: $font-weight-medium;
+  transition: $transition-base;
+  cursor: pointer;
+  border: none;
+  outline: none;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+@mixin button-primary {
+  @include button-base;
+  background-color: $primary-color;
+  color: $white;
+
+  &:hover:not(:disabled) {
+    background-color: $primary-hover;
+  }
+}
+
+@mixin button-secondary {
+  @include button-base;
+  background-color: $secondary-color;
+  color: $white;
+
+  &:hover:not(:disabled) {
+    background-color: darken($secondary-color, 10%);
+  }
+}
+
+@mixin truncate-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin responsive($breakpoint) {
+  @if $breakpoint == xs {
+    @media (max-width: 575.98px) { @content; }
+  } @else if $breakpoint == sm {
+    @media (max-width: 767.98px) { @content; }
+  } @else if $breakpoint == md {
+    @media (max-width: 991.98px) { @content; }
+  } @else if $breakpoint == lg {
+    @media (max-width: 1199.98px) { @content; }
+  } @else if $breakpoint == xl {
+    @media (max-width: 1399.98px) { @content; }
+  }
+}
+
+@mixin scrollbar {
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $gray-200;
+    border-radius: $border-radius-sm;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $gray-400;
+    border-radius: $border-radius-sm;
+
+    &:hover {
+      background: $gray-500;
+    }
+  }
+}

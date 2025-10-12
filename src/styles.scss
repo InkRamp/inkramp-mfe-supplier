@@ -1,1 +1,24 @@
 /* You can add global styles to this file, and also import other style files */
+@import './styles/tokens';
+@import './styles/mixins';
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  color: $gray-900;
+  background-color: $gray-100;
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-family-heading;
+  font-weight: $font-weight-semibold;
+  line-height: 1.2;
+  margin-bottom: $spacing-md;
+}

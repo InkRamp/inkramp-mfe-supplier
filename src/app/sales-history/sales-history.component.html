@@ -1,0 +1,108 @@
+<div class="sales-history-container">
+  <div class="header">
+    <h1>Sales History</h1>
+    <p class="subtitle" *ngIf="currentUser">
+      Viewing sales for: <strong>{{ selectedUserId === currentUser.id ? 'You' : (viewableUsers | json) }}</strong>
+    </p>
+  </div>
+
+  <!-- User selector for admins and team leads -->
+  <div class="user-selector" *ngIf="canViewMultipleUsers() && viewableUsers.length > 0">
+    <label for="userSelect">Select Sales Executive:</label>
+    <select id="userSelect" (change)="onUserChange($event)" [value]="selectedUserId || ''">
+      <option *ngFor="let user of viewableUsers" [value]="user.id">
+        {{ user.name }} ({{ user.email }})
+      </option>
+    </select>
+  </div>
+
+  <!-- Sales Summary -->
+  <div class="summary-cards" *ngIf="salesSummary">
+    <div class="summary-card">
+      <div class="card-icon completed">💰</div>
+      <div class="card-content">
+        <p class="card-label">Total Sales</p>
+        <p class="card-value">{{ formatCurrency(salesSummary.totalSales) }}</p>
+      </div>
+    </div>
+    
+    <div class="summary-card">
+      <div class="card-icon commission">💵</div>
+      <div class="card-content">
+        <p class="card-label">Total Commission</p>
+        <p class="card-value">{{ formatCurrency(salesSummary.totalCommission) }}</p>
+      </div>
+    </div>
+    
+    <div class="summary-card">
+      <div class="card-icon info">✅</div>
+      <div class="card-content">
+        <p class="card-label">Completed</p>
+        <p class="card-value">{{ salesSummary.completedCount }}</p>
+      </div>
+    </div>
+    
+    <div class="summary-card">
+      <div class="card-icon warning">⏳</div>
+      <div class="card-content">
+        <p class="card-label">Pending</p>
+        <p class="card-value">{{ salesSummary.pendingCount }}</p>
+      </div>
+    </div>
+    
+    <div class="summary-card">
+      <div class="card-icon danger">❌</div>
+      <div class="card-content">
+        <p class="card-label">Cancelled</p>
+        <p class="card-value">{{ salesSummary.cancelledCount }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading indicator -->
+  <div class="loading" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading sales data...</p>
+  </div>
+
+  <!-- Sales Records Table -->
+  <div class="sales-table-container" *ngIf="!isLoading && salesRecords.length > 0">
+    <table class="sales-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Client</th>
+          <th>Product</th>
+          <th>Category</th>
+          <th>Region</th>
+          <th>Amount</th>
+          <th>Commission</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let record of salesRecords">
+          <td>{{ formatDate(record.date) }}</td>
+          <td>{{ record.clientName }}</td>
+          <td>{{ record.productName }}</td>
+          <td>{{ record.productCategory }}</td>
+          <td>{{ record.region }}</td>
+          <td class="amount">{{ formatCurrency(record.amount) }}</td>
+          <td class="commission">{{ formatCurrency(record.commission) }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="getStatusClass(record.status)">
+              {{ record.status }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!isLoading && salesRecords.length === 0">
+    <div class="empty-icon">📊</div>
+    <h2>No Sales Records Found</h2>
+    <p>There are no sales records to display at this time.</p>
+  </div>
+</div>

@@ -2,7 +2,7 @@ const { shareAll, withModuleFederationPlugin } = require('@angular-architects/mo
 
 module.exports = withModuleFederationPlugin({
 
-  name: 'pokemon',
+  name: 'mfeMySales',
 
   exposes: {
     './Component': './src/app/app.component.ts',
@@ -15,7 +15,8 @@ module.exports = withModuleFederationPlugin({
     '@angular/core': { singleton: true, strictVersion: false, requiredVersion: 'auto' },
     '@angular/common': { singleton: true, strictVersion: false, requiredVersion: 'auto' },
     '@angular/common/http': { singleton: true, strictVersion: false, requiredVersion: 'auto' },
-    '@org/core-services': { singleton: true, strictVersion: true, requiredVersion: 'auto' }
+    '@org/core-services': { singleton: true, strictVersion: true, requiredVersion: 'auto' },
+    'rxjs': { singleton: true, strictVersion: false, requiredVersion: 'auto' }
     // leave out @angular/router if the remote doesn't need it
   },
 
