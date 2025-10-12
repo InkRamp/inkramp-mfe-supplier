@@ -203,6 +203,19 @@ npm test
 - 🎨 **Shared Design System**: Consistent styling with design tokens and mixins
 - 🔄 **Module Federation**: Works standalone or as part of a larger shell application
 
+## Core Services Library
+
+The `@org/core-services` library provides shared services for the MFE:
+
+- **AuthService**: Zitadel OIDC authentication
+- **RoleService**: Role-based access control
+- **SalesDataService**: Sales data management
+- **EventBusService**: Cross-component/MFE event communication
+- **MfeLoaderService**: Dynamic MFE loading
+- **DummyDataService**: Mock data generation
+
+For detailed usage examples, see [SERVICES_USAGE_GUIDE.md](./SERVICES_USAGE_GUIDE.md)
+
 ## Documentation
 
 For detailed documentation, see [MFE_DOCUMENTATION.md](./MFE_DOCUMENTATION.md)
@@ -222,6 +235,9 @@ This MFE uses:
 - **RoleService**: Manages user roles and permissions
 - **SalesDataService**: Provides sales data with filtering
 - **AuthService**: Handles Zitadel OIDC authentication
+- **EventBusService**: Global event bus for cross-component/MFE communication
+- **MfeLoaderService**: Dynamic MFE loading with Module Federation
+- **DummyDataService**: Mock data generation for testing and development
 
 ## Project Structure
 
