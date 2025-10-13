@@ -16,12 +16,13 @@ export class AppComponent implements OnInit {
   // isAuthenticated = false;
   // userInfo: any = null;
 
-  constructor(private auth: AuthService) {
-    console.log("In mfe-MY_SALES constructor", this.auth.id);
+  //constructor(private auth: AuthService) {
+  constructor() {
+    console.log("In mfe-MY_SALES constructor after removing authh hahaha");
   }
 
   ngOnInit(): void {
-    // console.log("IN ngOnInit of mfe-MY_SALES");
+    console.log("IN ngOnInit of mfe-MY_SALES");
     // this.isAuthenticated = this.auth.isAuthenticated();
     // this.userInfo = this.auth.getUser();
     
@@ -33,10 +34,10 @@ export class AppComponent implements OnInit {
   }
 
   login(): void {
-    this.auth.login();
+    //this.auth.login();
   }
 
   logout(): void {
-    this.auth.logout();
+    //this.auth.logout();
   }
 }
