@@ -13,30 +13,31 @@ import { SalesHistoryComponent } from './sales-history/sales-history.component';
 })
 export class AppComponent implements OnInit {
   title = 'mfe-MY_SALES';
-  isAuthenticated = false;
-  userInfo: any = null;
+  // isAuthenticated = false;
+  // userInfo: any = null;
 
-  constructor(private auth: AuthService) {
-    console.log("In mfe-MY_SALES constructor", this.auth.id);
+  //constructor(private auth: AuthService) {
+  constructor() {
+    console.log("In mfe-MY_SALES constructor after removing authh hahaha");
   }
 
   ngOnInit(): void {
     console.log("IN ngOnInit of mfe-MY_SALES");
-    this.isAuthenticated = this.auth.isAuthenticated();
-    this.userInfo = this.auth.getUser();
+    // this.isAuthenticated = this.auth.isAuthenticated();
+    // this.userInfo = this.auth.getUser();
     
-    // Subscribe to user changes
-    this.auth.user$.subscribe(user => {
-      this.userInfo = user;
-      this.isAuthenticated = !!user;
-    });
+    // // Subscribe to user changes
+    // this.auth.user$.subscribe(user => {
+    //   this.userInfo = user;
+    //   this.isAuthenticated = !!user;
+    // });
   }
 
   login(): void {
-    this.auth.login();
+    //this.auth.login();
   }
 
   logout(): void {
-    this.auth.logout();
+    //this.auth.logout();
   }
 }
