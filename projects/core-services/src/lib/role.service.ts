@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, Optional } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 /**
@@ -36,8 +36,11 @@ export interface User {
 export class RoleService {
   private currentUserSubject = new BehaviorSubject<User | null>(this.getDummyUser());
   public currentUser$: Observable<User | null> = this.currentUserSubject.asObservable();
+  private dataService: any;
 
-  constructor() {}
+  constructor(@Optional() @Inject('DataService') dataService?: any) {
+    this.dataService = dataService;
+  }
 
   /**
    * Get the current user

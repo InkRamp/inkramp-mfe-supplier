@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, Optional } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
@@ -61,8 +61,11 @@ export interface SalesSummary {
 })
 export class SalesDataService {
   private dummySalesData: SalesRecord[] = this.generateDummyData();
+  private dataService: any;
 
-  constructor() {}
+  constructor(@Optional() @Inject('DataService') dataService?: any) {
+    this.dataService = dataService;
+  }
 
   /**
    * Get sales records for a specific user
@@ -76,6 +79,10 @@ export class SalesDataService {
     startDate?: Date,
     endDate?: Date
   ): Observable<SalesRecord[]> {
+    if (this.dataService) {
+      return this.dataService.getSalesHistory(userId, startDate, endDate);
+    }
+    
     let filtered = this.dummySalesData.filter(sale => sale.salesExecutiveId === userId);
 
     if (startDate) {
@@ -96,6 +103,10 @@ export class SalesDataService {
    * @returns Observable of sales summary
    */
   getSalesSummary(userId: string): Observable<SalesSummary> {
+    if (this.dataService) {
+      return this.dataService.getSalesSummary(userId);
+    }
+    
     const userSales = this.dummySalesData.filter(sale => sale.salesExecutiveId === userId);
 
     const summary: SalesSummary = {
@@ -118,6 +129,10 @@ export class SalesDataService {
    * @returns Observable of all sales records
    */
   getAllSales(): Observable<SalesRecord[]> {
+    if (this.dataService) {
+      return this.dataService.getAllSales();
+    }
+    
     return of(this.dummySalesData).pipe(delay(300));
   }
 
