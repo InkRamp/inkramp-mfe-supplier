@@ -46,10 +46,13 @@ Implemented comprehensive RBAC system with four roles:
 
 ### Data & Backend
 
-1. **Dummy Data Usage**
-   - Assumption: Backend API is not yet available
-   - Implementation: Generated 50 realistic sales records in-memory
-   - Future: Replace SalesDataService with actual API calls
+1. **GraphQL Architecture Implementation** (NEW - October 15, 2025)
+   - Assumption: GraphQL will be the eventual data source
+   - Implementation: Created unified DataService that switches between mock/GraphQL
+   - Configuration: Single flag (`useGraphQL`) in `data.config.ts` controls data source
+   - Mock Data: Centralized in `mock-data.ts` for easy management
+   - GraphQL Queries: Pre-defined in `graphql/queries/` folder
+   - Future: Just flip the flag and update endpoint when GraphQL backend is ready
 
 2. **User Authentication**
    - Assumption: Zitadel authentication is handled by shell
@@ -255,6 +258,7 @@ $primary-color: #ff6600;
 ### Unit Tests
 - ✅ RoleService: All permission methods
 - ✅ SalesDataService: Data retrieval and filtering
+- ✅ DataService: Mock data operations (NEW)
 - ✅ AppComponent: Basic rendering
 - 🔄 SalesHistoryComponent: To be added
 
@@ -412,12 +416,80 @@ $primary-color: #ff6600;
 - [x] Unit tests added
 - [x] Build successful
 - [x] Documentation complete
-- [ ] API integration (future)
+- [x] GraphQL architecture implemented (October 15, 2025)
+- [x] Centralized mock data system
+- [x] Data service abstraction layer
+- [ ] API integration (future - flip useGraphQL flag)
 - [ ] E2E tests (future)
 - [ ] Performance testing (future)
 
 ---
 
-**Last Updated**: October 11, 2025  
-**Version**: 1.0.0  
-**Status**: MVP Complete - Ready for Integration
+## 🆕 GraphQL Data Layer (Added October 15, 2025)
+
+### Architecture Overview
+
+A unified data layer has been implemented that supports both mock data (for development) and GraphQL (for production) with a simple configuration flag.
+
+### Key Files
+
+1. **Configuration**
+   - `src/app/config/data.config.ts` - Main config with useGraphQL flag
+   - `src/app/graphql/graphql.config.ts` - GraphQL endpoint and headers
+
+2. **Data**
+   - `src/app/data/mock-data.ts` - All mock data centralized
+   - 6 users, 50 sales records, product catalog
+
+3. **GraphQL Queries**
+   - `src/app/graphql/queries/sales.queries.ts` - Sales queries
+   - `src/app/graphql/queries/user.queries.ts` - User queries
+
+4. **Service Layer**
+   - `src/app/services/data.service.ts` - Unified data abstraction
+   - Automatically switches between mock/GraphQL based on config
+
+### How It Works
+
+```typescript
+// In data.config.ts
+export const DATA_CONFIG = {
+  useGraphQL: false,  // Set to true for GraphQL
+  graphqlEndpoint: 'https://api.example.com/graphql',
+  mockDataDelay: 300
+};
+```
+
+The DataService checks this flag and either:
+- Returns mock data from `MOCK_DATA` (if false)
+- Executes GraphQL queries (if true)
+
+### Benefits
+
+✅ **Single source of truth** - All mock data in one file  
+✅ **Easy to switch** - One boolean flag  
+✅ **Type-safe** - TypeScript interfaces ensure consistency  
+✅ **Backward compatible** - Existing services work unchanged  
+✅ **Well-tested** - Comprehensive test coverage  
+✅ **Ready for GraphQL** - Queries already defined
+
+### Migration Path
+
+When GraphQL backend is ready:
+1. Update `graphqlEndpoint` in config
+2. Set `useGraphQL: true`
+3. Rebuild and deploy
+
+No code changes needed - just configuration!
+
+### Documentation
+
+See detailed documentation:
+- `GRAPHQL_ARCHITECTURE.md` - Full architecture details
+- `QUICK_START_GRAPHQL.md` - Quick start guide
+
+---
+
+**Last Updated**: October 15, 2025  
+**Version**: 1.1.0  
+**Status**: MVP Complete + GraphQL Ready - Ready for Integration
