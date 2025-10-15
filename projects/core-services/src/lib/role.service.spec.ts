@@ -16,7 +16,7 @@ describe('RoleService', () => {
   it('should return current user', () => {
     const user = service.getCurrentUser();
     expect(user).toBeTruthy();
-    expect(user?.id).toBe('1');
+    expect(user?.id).toBe('user-4');
   });
 
   it('should set current user', () => {

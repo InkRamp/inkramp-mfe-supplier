@@ -101,9 +101,9 @@ export class RoleService {
   getAllUsers(): User[] {
     return [
       {
-        id: '1',
-        name: 'John Doe',
-        email: 'john.doe@example.com',
+        id: 'user-1',
+        name: 'John Admin',
+        email: 'john.admin@company.com',
         role: UserRole.SUPER_ADMIN
       },
       {
@@ -171,12 +171,14 @@ export class RoleService {
    * @returns A dummy user
    */
   private getDummyUser(): User {
-    // Return John Doe as the default user for shell compatibility
+    // Return a sales executive by default for testing
     return {
-      id: '1',
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      role: UserRole.SUPER_ADMIN
+      id: 'user-4',
+      name: 'Alice Sales',
+      email: 'alice.sales@company.com',
+      role: UserRole.SALES_EXECUTIVE,
+      teamId: 'team-1',
+      managerId: 'user-3'
     };
   }
 }
