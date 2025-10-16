@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, tap } from 'rxjs/operators';
 import { 
   RoleService, 
   User, 
@@ -50,7 +50,9 @@ export class SalesHistoryComponent implements OnInit, OnDestroy {
    */
   ngOnInit(): void {
     this.roleService.currentUser$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this.destroy$),tap(e=>{
+        console.log("In sales history the role service is ...",e)
+      }))
       .subscribe(user => {
         this.currentUser = user;
         if (user) {
