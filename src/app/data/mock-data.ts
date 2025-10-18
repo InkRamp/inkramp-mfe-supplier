@@ -91,9 +91,9 @@ function generateSalesRecords(): SalesRecord[] {
 export const MOCK_DATA: MockDataSet = {
   users: [
     {
-      id: 'user-1',
-      name: 'John Admin',
-      email: 'john.admin@company.com',
+      id: '1',
+      name: 'John Doe',
+      email: 'john.doe@example.com',
       role: UserRole.SUPER_ADMIN
     },
     {
