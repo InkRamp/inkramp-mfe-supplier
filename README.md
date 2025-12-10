@@ -205,7 +205,9 @@ npm test
 
 ## Documentation
 
-For detailed documentation, see [MFE_DOCUMENTATION.md](./MFE_DOCUMENTATION.md)
+For detailed documentation, see:
+- [MFE_DOCUMENTATION.md](./MFE_DOCUMENTATION.md) - MFE architecture and implementation
+- [API_CONTRACTS.md](./API_CONTRACTS.md) - Complete API documentation for REST and GraphQL endpoints
 
 ## Architecture
 
@@ -215,6 +217,7 @@ This MFE uses:
 - Zitadel for authentication
 - RxJS for reactive programming
 - SCSS with shared tokens for styling
+- GraphQL and REST API integration
 
 ## Key Components
 
@@ -222,18 +225,102 @@ This MFE uses:
 - **RoleService**: Manages user roles and permissions
 - **SalesDataService**: Provides sales data with filtering
 - **AuthService**: Handles Zitadel OIDC authentication
+- **ApiService**: Handles REST API communication
+- **DataService**: Abstracts GraphQL queries
+
+## API Integration
+
+This application integrates with the Sales Incentive Management System backend through both REST and GraphQL APIs.
+
+### Configuration
+
+Configure API endpoints in `src/app/config/data.config.ts`:
+
+```typescript
+export const DATA_CONFIG: DataConfig = {
+  useGraphQL: true,  // Enable GraphQL
+  useRestAPI: true,  // Enable REST API
+  endpoints: {
+    graphql: 'https://your-api-gateway-url/graphql',
+    dbAdaptor: 'https://your-api-gateway-url/db',
+    authService: 'https://your-api-gateway-url/auth',
+    contextService: 'https://your-api-gateway-url/context'
+  },
+  mockDataDelay: 300
+};
+```
+
+### Available Features
+
+- **User Management**: Get users, create users, manage roles
+- **Incentive Management**: View incentives, create rules, track payments
+- **Target Management**: Set targets, track progress, monitor achievements
+- **Task Management**: Create tasks, update status, track completion
+- **Data Seeding**: Seed test data with authenticated user context
+
+### Using the API Service
+
+```typescript
+import { ApiService } from './services/api.service';
+
+constructor(private apiService: ApiService) {}
+
+// Get incentives
+this.apiService.getIncentives('brandId', { userId: 'user-id' })
+  .subscribe(response => {
+    if (response.success) {
+      console.log(response.data);
+    }
+  });
+```
+
+### Using GraphQL Queries
+
+```typescript
+import { DataService } from './services/data.service';
+import { INCENTIVE_QUERIES } from './graphql/queries';
+
+constructor(private dataService: DataService) {}
+
+// Query GraphQL
+this.dataService.queryGraphQL(
+  INCENTIVE_QUERIES.GET_MY_INCENTIVES,
+  { status: 'APPROVED' }
+).subscribe(response => {
+  console.log(response.data.myIncentives);
+});
+```
+
+For complete API documentation, see [API_CONTRACTS.md](./API_CONTRACTS.md).
 
 ## Project Structure
 
 ```
 mfe-MY_SALES/
 ├── src/
-│   ├── app/                    # Application components
+│   ├── app/
+│   │   ├── config/             # Configuration files
+│   │   │   └── data.config.ts  # API endpoint configuration
+│   │   ├── graphql/            # GraphQL queries and config
+│   │   │   ├── queries/        # Query definitions
+│   │   │   │   ├── user.queries.ts
+│   │   │   │   ├── sales.queries.ts
+│   │   │   │   ├── incentive.queries.ts
+│   │   │   │   ├── target.queries.ts
+│   │   │   │   └── task.queries.ts
+│   │   │   └── graphql.config.ts
+│   │   ├── models/             # TypeScript interfaces
+│   │   │   └── api-types.ts    # API type definitions
+│   │   ├── services/           # Angular services
+│   │   │   ├── data.service.ts    # GraphQL service
+│   │   │   └── api.service.ts     # REST API service
+│   │   └── ...                 # Other components
 │   ├── styles/                 # Shared SCSS tokens and mixins
 │   └── styles.scss            # Global styles
 ├── projects/
 │   └── core-services/         # Shared services library
-├── MFE_DOCUMENTATION.md       # Detailed documentation
+├── API_CONTRACTS.md           # Complete API documentation
+├── MFE_DOCUMENTATION.md       # MFE architecture docs
 └── README.md                  # This file
 ```
 
