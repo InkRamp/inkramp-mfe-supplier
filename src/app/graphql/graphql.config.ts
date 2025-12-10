@@ -6,12 +6,17 @@ export interface GraphQLConfig {
 }
 
 export const GRAPHQL_CONFIG: GraphQLConfig = {
-  endpoint: DATA_CONFIG.graphqlEndpoint || 'https://api.example.com/graphql',
+  endpoint: DATA_CONFIG.endpoints.graphql,
   headers: {
     'Content-Type': 'application/json'
   }
 };
 
+/**
+ * Get GraphQL headers with optional authentication token
+ * @param authToken - Optional JWT Bearer token
+ * @returns Headers object with authentication if provided
+ */
 export function getGraphQLHeaders(authToken?: string): Record<string, string> {
   const headers = { ...GRAPHQL_CONFIG.headers };
   
@@ -21,3 +26,4 @@ export function getGraphQLHeaders(authToken?: string): Record<string, string> {
   
   return headers;
 }
+
