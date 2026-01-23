@@ -9,6 +9,6 @@ export const DATA_CONFIG: DataConfig = {
   useGraphQL: false,
   graphqlEndpoint: 'https://api.example.com/graphql',
   mockDataDelay: 300,
-  // Set to true to enable mock/dummy data for development
-  useMockData: true
+  // Set to false to use real API in standalone mode
+  useMockData: false
 };

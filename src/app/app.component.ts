@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '@org/core-services';
 import { SalesHistoryComponent } from './sales-history/sales-history.component';
+import { DataService } from './services/data.service';
 
 @Component({
   selector: 'app-root',
@@ -13,24 +14,42 @@ import { SalesHistoryComponent } from './sales-history/sales-history.component';
 })
 export class AppComponent implements OnInit {
   title = 'mfe-MY_SALES';
-  // isAuthenticated = false;
-  // userInfo: any = null;
+  incentivesData: any = null;
+  incentivesError: string | null = null;
+  isLoadingIncentives = false;
 
-  //constructor(private auth: AuthService) {
-  constructor() {
-    console.log("In mfe-MY_SALES constructor after removing authh hahaha");
+  constructor(private dataService: DataService) {
+    console.log("In mfe-MY_SALES constructor");
   }
 
   ngOnInit(): void {
     console.log("IN ngOnInit of mfe-MY_SALES");
-    // this.isAuthenticated = this.auth.isAuthenticated();
-    // this.userInfo = this.auth.getUser();
+    this.loadIncentives();
+  }
+
+  loadIncentives(): void {
+    console.log("Loading incentives from API...");
+    this.isLoadingIncentives = true;
+    this.incentivesError = null;
     
-    // // Subscribe to user changes
-    // this.auth.user$.subscribe(user => {
-    //   this.userInfo = user;
-    //   this.isAuthenticated = !!user;
-    // });
+    try {
+      this.dataService.getIncentives().subscribe({
+        next: (response) => {
+          console.log("Incentives API response:", response);
+          this.incentivesData = response;
+          this.isLoadingIncentives = false;
+        },
+        error: (error) => {
+          console.error("Error loading incentives:", error);
+          this.incentivesError = error.message || 'Failed to load incentives';
+          this.isLoadingIncentives = false;
+        }
+      });
+    } catch (error: any) {
+      console.error("Exception loading incentives:", error);
+      this.incentivesError = error.message || 'Failed to load incentives';
+      this.isLoadingIncentives = false;
+    }
   }
 
   login(): void {

@@ -2,15 +2,36 @@
   <header class="app-header">
     <div class="header-content">
       <h1 class="app-title">💼 My Sales</h1>
-      <!-- <div class="header-actions">
-        <span class="user-info" *ngIf="isAuthenticated && userInfo">
-          👤 {{ userInfo.name || userInfo.email }}
-        </span>
-      </div> -->
     </div>
   </header>
 
   <main class="app-main">
+    <!-- Incentives API Status -->
+    <div class="api-status" style="background: #f5f5f5; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
+      <h3 style="margin-top: 0;">🔌 API Status</h3>
+      
+      <div *ngIf="isLoadingIncentives" style="color: #0066cc;">
+        ⏳ Loading incentives from API...
+      </div>
+      
+      <div *ngIf="incentivesError" style="color: #d32f2f; padding: 10px; background: #ffebee; border-radius: 4px;">
+        ❌ <strong>Error:</strong> {{ incentivesError }}
+        <div style="margin-top: 10px; font-size: 12px; font-family: monospace;">
+          Check browser console for details
+        </div>
+      </div>
+      
+      <div *ngIf="incentivesData && !isLoadingIncentives" style="color: #2e7d32;">
+        ✅ <strong>API Connected Successfully!</strong>
+        <div style="margin-top: 10px; font-size: 14px;">
+          Incentives loaded: {{ incentivesData?.data?.length || 0 }} records
+        </div>
+        <div style="margin-top: 10px; font-size: 12px; font-family: monospace; background: white; padding: 10px; border-radius: 4px; max-height: 200px; overflow: auto;">
+          {{ incentivesData | json }}
+        </div>
+      </div>
+    </div>
+
     <app-sales-history></app-sales-history>
   </main>
 
