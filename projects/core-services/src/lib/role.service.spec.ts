@@ -116,6 +116,17 @@ describe('RoleService', () => {
       role: UserRole.SALES_EXECUTIVE
     };
 
+    const allUsers: User[] = [
+      salesUser,
+      {
+        id: 'sales-2',
+        name: 'Other Sales',
+        email: 'other@example.com',
+        role: UserRole.SALES_EXECUTIVE
+      }
+    ];
+
+    service.setAllUsers(allUsers);
     service.setCurrentUser(salesUser);
     const viewableUsers = service.getViewableUsers();
     expect(viewableUsers.length).toBeGreaterThanOrEqual(1);
@@ -132,6 +143,16 @@ describe('RoleService', () => {
       role: UserRole.TEAM_LEAD
     };
 
+    const salesUser: User = {
+      id: 'sales-1',
+      name: 'Sales User',
+      email: 'sales@example.com',
+      role: UserRole.SALES_EXECUTIVE
+    };
+
+    const allUsers: User[] = [teamLead, salesUser];
+
+    service.setAllUsers(allUsers);
     service.setCurrentUser(teamLead);
     const viewableUsers = service.getViewableUsers();
     expect(viewableUsers.length).toBeGreaterThan(1);
