@@ -7,12 +7,12 @@ describe('TokenService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({});
     service = TestBed.inject(TokenService);
-    // Clear localStorage before each test
-    localStorage.clear();
+    // Clear sessionStorage before each test
+    sessionStorage.clear();
   });
 
   afterEach(() => {
-    localStorage.clear();
+    sessionStorage.clear();
   });
 
   it('should be created', () => {
@@ -55,6 +55,6 @@ describe('TokenService', () => {
   it('should use bearer_token as storage key', () => {
     const testToken = 'test-token';
     service.setToken(testToken);
-    expect(localStorage.getItem('bearer_token')).toBe(testToken);
+    expect(sessionStorage.getItem('bearer_token')).toBe(testToken);
   });
 });

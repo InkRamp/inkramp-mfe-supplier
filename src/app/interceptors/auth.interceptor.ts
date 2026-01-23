@@ -5,7 +5,7 @@ import { TokenService } from '../services/token.service';
 /**
  * HTTP Interceptor to add Bearer token to all API requests
  * Works in both standalone and SPA (Module Federation) modes
- * Token is read from localStorage on every request
+ * Token is read from sessionStorage on every request
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const tokenService = inject(TokenService);

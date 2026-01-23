@@ -11,7 +11,7 @@ This implementation transforms the application to support both standalone and SP
 - `src/app/services/token.service.spec.ts` - Comprehensive tests
 
 **Features:**
-- Store/retrieve Bearer token from localStorage
+- Store/retrieve Bearer token from sessionStorage
 - Uses standard key `bearer_token` for easy debugging
 - Simple API: `getToken()`, `setToken()`, `removeToken()`, `hasToken()`
 
@@ -22,7 +22,7 @@ This implementation transforms the application to support both standalone and SP
 
 **Features:**
 - Automatically adds `Authorization: Bearer <token>` header to all HTTP requests
-- Reads token from localStorage on every request (supports live token updates)
+- Reads token from sessionStorage on every request (supports live token updates)
 - Works seamlessly with both standalone and SPA modes
 
 ### 3. Stateless Authentication Service
@@ -100,9 +100,9 @@ This implementation transforms the application to support both standalone and SP
 ## How It Works
 
 ### Token Flow
-1. Developer or OAuth flow sets token: `localStorage.setItem('bearer_token', 'token_value')`
+1. Developer or OAuth flow sets token: `sessionStorage.setItem('bearer_token', 'token_value')`
 2. Application makes HTTP request
-3. HTTP interceptor reads token from localStorage
+3. HTTP interceptor reads token from sessionStorage
 4. Interceptor adds `Authorization: Bearer <token>` header
 5. API validates token and returns data
 6. Application uses API response (no local user state)
@@ -110,7 +110,7 @@ This implementation transforms the application to support both standalone and SP
 ### Debugging Workflow
 1. Copy Bearer token from your authentication system
 2. Open browser DevTools console
-3. Run: `localStorage.setItem('bearer_token', 'YOUR_TOKEN_HERE')`
+3. Run: `sessionStorage.setItem('bearer_token', 'YOUR_TOKEN_HERE')`
 4. Refresh the page (F5)
 5. App now uses your token for all API calls
 
@@ -129,7 +129,7 @@ npm start
 
 **SPA Mode:**
 - Loaded via webpack module federation
-- Token shared across micro-frontends via localStorage
+- Token shared across micro-frontends via sessionStorage
 
 ## Testing
 
@@ -157,7 +157,7 @@ If you have existing code that expects stateful authentication:
 1. **Remove local user storage dependencies:**
    ```typescript
    // Before
-   const user = localStorage.getItem('user_info');
+   const user = sessionStorage.getItem('user_info');
    
    // After
    const user$ = this.dataService.getCurrentUser();
@@ -177,12 +177,12 @@ If you have existing code that expects stateful authentication:
 3. **Token management:**
    ```typescript
    // Before
-   localStorage.setItem('zitadel_token', token);
+   sessionStorage.setItem('zitadel_token', token);
    
    // After
    this.tokenService.setToken(token);
    // or
-   localStorage.setItem('bearer_token', token);
+   sessionStorage.setItem('bearer_token', token);
    ```
 
 ### For New Code
@@ -220,7 +220,7 @@ export const DATA_CONFIG: DataConfig = {
 ## Security Considerations
 
 1. **Token Storage:**
-   - Tokens stored in localStorage (accessible to JavaScript)
+   - Tokens stored in sessionStorage (accessible to JavaScript)
    - Consider using httpOnly cookies for production if XSS is a concern
 
 2. **Token Validation:**
@@ -241,7 +241,7 @@ export const DATA_CONFIG: DataConfig = {
    - Quick iteration during development
 
 2. **Stateless UI:**
-   - No stale data in localStorage
+   - No stale data in sessionStorage
    - Always fresh from API
    - Easier to test
 

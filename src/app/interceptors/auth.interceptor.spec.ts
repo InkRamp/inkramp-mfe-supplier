@@ -22,12 +22,12 @@ describe('AuthInterceptor', () => {
     httpClient = TestBed.inject(HttpClient);
     httpMock = TestBed.inject(HttpTestingController);
     tokenService = TestBed.inject(TokenService);
-    localStorage.clear();
+    sessionStorage.clear();
   });
 
   afterEach(() => {
     httpMock.verify();
-    localStorage.clear();
+    sessionStorage.clear();
   });
 
   it('should add Authorization header when token exists', () => {
@@ -50,7 +50,7 @@ describe('AuthInterceptor', () => {
     req.flush({});
   });
 
-  it('should read token from localStorage on each request', () => {
+  it('should read token from sessionStorage on each request', () => {
     // First request without token
     httpClient.get('/api/test1').subscribe();
     const req1 = httpMock.expectOne('/api/test1');

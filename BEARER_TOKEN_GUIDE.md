@@ -2,6 +2,13 @@
 
 This application supports both standalone and SPA (Module Federation) modes with stateless, API-driven authentication.
 
+## Security Note
+
+**Tokens are stored in sessionStorage** for enhanced security. SessionStorage is:
+- Cleared when the browser tab is closed
+- Not accessible across different tabs/windows
+- More secure than localStorage for sensitive tokens
+
 ## Quick Start for Debugging
 
 ### 1. Copy/Paste Bearer Tokens
@@ -11,7 +18,7 @@ For debugging purposes, you can manually set Bearer tokens:
 1. Open your browser's DevTools Console
 2. Paste the following command with your token:
    ```javascript
-   localStorage.setItem('bearer_token', 'YOUR_BEARER_TOKEN_HERE');
+   sessionStorage.setItem('bearer_token', 'YOUR_BEARER_TOKEN_HERE');
    ```
 3. Refresh the page (F5 or Cmd+R)
 4. The token will be automatically included in all API requests
@@ -20,14 +27,14 @@ For debugging purposes, you can manually set Bearer tokens:
 
 To check the current token:
 ```javascript
-localStorage.getItem('bearer_token');
+sessionStorage.getItem('bearer_token');
 ```
 
 ### 3. Remove Token
 
 To clear the token:
 ```javascript
-localStorage.removeItem('bearer_token');
+sessionStorage.removeItem('bearer_token');
 ```
 
 ## How It Works
@@ -43,7 +50,7 @@ localStorage.removeItem('bearer_token');
 ### HTTP Interceptor
 
 The `authInterceptor` automatically:
-1. Reads the Bearer token from `localStorage` on every request
+1. Reads the Bearer token from `sessionStorage` on every request
 2. Adds `Authorization: Bearer <token>` header to all API calls
 3. Works seamlessly without manual configuration
 
@@ -84,7 +91,7 @@ The app exposes components via webpack module federation and can be loaded by a 
 ## Differences from Previous Implementation
 
 ### Before (Stateful)
-- User info stored in localStorage
+- User info stored in sessionStorage
 - OIDC flow managed authentication state
 - Hardcoded dummy users in services
 - Token stored with specific key name
@@ -110,7 +117,7 @@ The app exposes components via webpack module federation and can be loaded by a 
 ## Troubleshooting
 
 ### Token not being sent
-1. Check token exists: `localStorage.getItem('bearer_token')`
+1. Check token exists: `sessionStorage.getItem('bearer_token')`
 2. Check browser DevTools Network tab for Authorization header
 3. Verify HTTP interceptor is registered in `app.config.ts`
 

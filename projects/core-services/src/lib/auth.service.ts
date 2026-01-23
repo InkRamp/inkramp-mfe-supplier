@@ -27,6 +27,7 @@ interface UserInfo {
  * - No user state stored locally
  * - Works with HTTP interceptor for automatic token injection
  * - Supports OIDC flow for production use
+ * - Uses sessionStorage for security - tokens cleared when browser tab is closed
  */
 @Injectable({
   providedIn: 'root'
@@ -136,26 +137,26 @@ export class AuthService {
   }
 
   /**
-   * Get the Bearer token from localStorage
+   * Get the Bearer token from sessionStorage
    * Used by HTTP interceptor
    */
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    return sessionStorage.getItem(this.TOKEN_KEY);
   }
 
   /**
-   * Set the Bearer token in localStorage
+   * Set the Bearer token in sessionStorage
    * Useful for debugging - copy/paste tokens and refresh the page
    */
   setToken(token: string): void {
-    localStorage.setItem(this.TOKEN_KEY, token);
+    sessionStorage.setItem(this.TOKEN_KEY, token);
   }
 
   /**
    * Remove the Bearer token
    */
   removeToken(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
+    sessionStorage.removeItem(this.TOKEN_KEY);
   }
 
   /**

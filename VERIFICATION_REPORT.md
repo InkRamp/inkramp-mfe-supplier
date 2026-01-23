@@ -9,7 +9,7 @@ Successfully implemented comprehensive stateless authentication architecture to 
 ## Requirements Verification
 
 ### Requirement 1: Standalone & SPA Mode with Bearer Token Support ✅
-- [x] Bearer tokens can be manually set via localStorage
+- [x] Bearer tokens can be manually set via sessionStorage
 - [x] Simple refresh picks up new token
 - [x] HTTP interceptor automatically injects Bearer token into all API requests
 - [x] Token service provides centralized management
@@ -17,7 +17,7 @@ Successfully implemented comprehensive stateless authentication architecture to 
 - [x] Comprehensive documentation provided
 
 ### Requirement 2: Stateless UI with API-Driven Auth/Authz ✅
-- [x] Removed all stateful user storage from localStorage
+- [x] Removed all stateful user storage from sessionStorage
 - [x] User information comes from API responses
 - [x] Token validation handled by API, not UI
 - [x] RoleService no longer has hardcoded users (unless explicitly configured)
@@ -77,7 +77,7 @@ No security vulnerabilities found
 
 ### 1. Bearer Token Management
 - Centralized `TokenService` for token operations
-- Standard `bearer_token` key in localStorage
+- Standard `bearer_token` key in sessionStorage
 - Easy debug workflow: set token → refresh → works
 - Automatic injection via HTTP interceptor
 
@@ -88,7 +88,7 @@ No security vulnerabilities found
 - No manual header management needed
 
 ### 3. Stateless Architecture
-- No user data in localStorage
+- No user data in sessionStorage
 - All data from API responses
 - Token is only persistent item
 - API controls all auth/authz
@@ -115,7 +115,7 @@ DATA_CONFIG.useMockData = false; // Disable for production
 ```javascript
 // 1. Get token from your auth system
 // 2. Open DevTools Console
-localStorage.setItem('bearer_token', 'eyJhbGc...');
+sessionStorage.setItem('bearer_token', 'eyJhbGc...');
 
 // 3. Refresh page (F5)
 // 4. All API calls now include the token
@@ -184,12 +184,12 @@ API_CONFIG.baseUrl = process.env.API_URL;
 
 ### Browser Support
 - All modern browsers
-- localStorage required
+- sessionStorage required
 - ES6+ JavaScript
 
 ### Module Federation
 - Compatible with webpack module federation
-- Shares token via localStorage
+- Shares token via sessionStorage
 - Works with dynamic loading
 
 ## Migration Path
@@ -197,14 +197,14 @@ API_CONFIG.baseUrl = process.env.API_URL;
 For existing codebases:
 
 1. **Update token storage key** from custom keys to `bearer_token`
-2. **Remove user info from localStorage** - fetch from API instead
+2. **Remove user info from sessionStorage** - fetch from API instead
 3. **Update API calls** to use new configuration system
 4. **Enable interceptor** in app.config.ts
 5. **Test with manual token** before production deployment
 
 ## Known Limitations
 
-1. **LocalStorage Required**: Token stored in localStorage (accessible to JavaScript)
+1. **LocalStorage Required**: Token stored in sessionStorage (accessible to JavaScript)
    - Consider httpOnly cookies for enhanced security if XSS is a concern
    
 2. **No Token Refresh**: Automatic token refresh not implemented
@@ -217,7 +217,7 @@ For existing codebases:
 ## Future Enhancements
 
 1. **Token Refresh**: Add automatic token refresh logic
-2. **HTTP Cookies**: Option to use httpOnly cookies instead of localStorage
+2. **HTTP Cookies**: Option to use httpOnly cookies instead of sessionStorage
 3. **Token Validation**: Client-side JWT validation for UX improvements
 4. **Error Handling**: Enhanced 401/403 error handling
 5. **Token Expiry UI**: Show token expiry warnings
@@ -248,7 +248,7 @@ For existing codebases:
 ✅ **Both requirements fully met:**
 
 1. ✅ App works in standalone and SPA modes with Bearer token support
-   - Manual token setting via localStorage works
+   - Manual token setting via sessionStorage works
    - Simple refresh picks up new tokens
    - No extensive documentation created (kept concise)
 
