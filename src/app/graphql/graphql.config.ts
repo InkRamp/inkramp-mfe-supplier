@@ -12,12 +12,16 @@ export const GRAPHQL_CONFIG: GraphQLConfig = {
   }
 };
 
-export function getGraphQLHeaders(authToken?: string): Record<string, string> {
+/**
+ * Get GraphQL headers with Bearer token from localStorage
+ * Note: The authInterceptor will automatically add the Authorization header,
+ * but this function is kept for explicit usage if needed
+ */
+export function getGraphQLHeaders(): Record<string, string> {
   const headers = { ...GRAPHQL_CONFIG.headers };
   
-  if (authToken) {
-    headers['Authorization'] = `Bearer ${authToken}`;
-  }
+  // Token will be added by authInterceptor automatically
+  // No need to manually add it here
   
   return headers;
 }

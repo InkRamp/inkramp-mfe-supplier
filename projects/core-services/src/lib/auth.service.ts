@@ -16,6 +16,18 @@ interface UserInfo {
   email?: string;
 }
 
+/**
+ * Stateless Authentication Service
+ * 
+ * This service is designed to work in both standalone and SPA (Module Federation) modes.
+ * All authentication and authorization is handled by the API.
+ * 
+ * Features:
+ * - Manual token management for debugging (copy/paste tokens)
+ * - No user state stored locally
+ * - Works with HTTP interceptor for automatic token injection
+ * - Supports OIDC flow for production use
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -27,16 +39,20 @@ export class AuthService {
   private readonly CLIENT_ID = '336777344075263315';
   private readonly REDIRECT_URI = 'https://opensourcekd.github.io/pokemon/#/auth-callback';
   private readonly SCOPE = 'openid profile email';
-  private readonly TOKEN_KEY = 'zitadel_token';
-  private readonly USER_INFO_KEY = 'zitadel_user_info';
+  private readonly TOKEN_KEY = 'bearer_token';
 
-  private userSubject = new BehaviorSubject<UserInfo | null>(this.getUserInfoFromStorage());
+  // Note: User info is NOT stored - it comes from API responses
+  private userSubject = new BehaviorSubject<UserInfo | null>(null);
   public user$: Observable<UserInfo | null> = this.userSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    console.log("In constructor of auth service in pokemon");
+    console.log("In constructor of auth service");
   }
 
+  /**
+   * Initiate login flow
+   * For debugging, you can manually set a token using setToken() instead
+   */
   login(user?: string) {
     if (user) {
       console.log(`[AuthService] Logged in: ${user}`);
@@ -74,10 +90,6 @@ export class AuthService {
       const tokenResponse = await this.exchangeCodeForToken(code);
       this.setToken(tokenResponse.access_token);
       
-      // Decode and store user info from ID token
-      const userInfo = this.decodeIdToken(tokenResponse.id_token);
-      this.setUserInfo(userInfo);
-      
       // Clean up
       sessionStorage.removeItem('oauth_state');
       sessionStorage.removeItem('code_verifier');
@@ -114,50 +126,59 @@ export class AuthService {
     return response.json();
   }
 
-  private decodeIdToken(idToken: string): UserInfo {
-    try {
-      const payload = idToken.split('.')[1];
-      const decoded = JSON.parse(atob(payload));
-      return {
-        sub: decoded.sub,
-        name: decoded.name,
-        email: decoded.email,
-      };
-    } catch (error) {
-      console.error('Error decoding ID token:', error);
-      return { sub: '' };
-    }
-  }
-
+  /**
+   * Logout - clears token
+   * User info comes from API, so no need to clear user state
+   */
   logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_INFO_KEY);
+    this.removeToken();
     this.userSubject.next(null);
   }
 
+  /**
+   * Get the Bearer token from localStorage
+   * Used by HTTP interceptor
+   */
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
+  /**
+   * Set the Bearer token in localStorage
+   * Useful for debugging - copy/paste tokens and refresh the page
+   */
   setToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
   }
 
+  /**
+   * Remove the Bearer token
+   */
+  removeToken(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+  }
+
+  /**
+   * Check if token exists
+   * Note: This does NOT validate the token - validation happens on the API
+   */
   isAuthenticated(): boolean {
     return !!this.getToken();
   }
 
+  /**
+   * Get user info from current state
+   * Note: User info should come from API responses, not stored locally
+   */
   getUser(): UserInfo | null {
     return this.userSubject.value;
   }
 
-  private getUserInfoFromStorage(): UserInfo | null {
-    const userJson = localStorage.getItem(this.USER_INFO_KEY);
-    return userJson ? JSON.parse(userJson) : null;
-  }
-
-  private setUserInfo(userInfo: UserInfo): void {
-    localStorage.setItem(this.USER_INFO_KEY, JSON.stringify(userInfo));
+  /**
+   * Set user info (typically from API response)
+   * This is stateful but only holds temporary UI state
+   */
+  setUserInfo(userInfo: UserInfo): void {
     this.userSubject.next(userInfo);
   }
 

@@ -25,8 +25,15 @@ export interface User {
 }
 
 /**
- * Role-based access control service
- * Manages user roles and permissions across the application
+ * Stateless Role-based Access Control Service
+ * 
+ * This service is designed to work with API-driven authentication/authorization.
+ * User information comes from API responses, not from local storage.
+ * 
+ * For debugging/testing in standalone mode:
+ * - Temporarily holds user state in memory (BehaviorSubject)
+ * - This state should be populated from API responses
+ * - If no API, uses minimal dummy data only as fallback
  * 
  * @Injectable providedIn: 'root' makes this service a singleton
  */
@@ -34,12 +41,33 @@ export interface User {
   providedIn: 'root'
 })
 export class RoleService {
-  private currentUserSubject = new BehaviorSubject<User | null>(this.getDummyUser());
+  // Temporary state for current user (should be populated from API)
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$: Observable<User | null> = this.currentUserSubject.asObservable();
+  
+  // All users list (should come from API)
+  private allUsersSubject = new BehaviorSubject<User[]>([]);
+  public allUsers$: Observable<User[]> = this.allUsersSubject.asObservable();
+  
   private dataService: any;
 
   constructor(@Optional() @Inject('DataService') dataService?: any) {
     this.dataService = dataService;
+    
+    // For debugging in standalone mode without API, load minimal dummy data
+    // In production, this should be removed and data should come from API
+    if (!this.dataService) {
+      console.warn('[RoleService] No DataService found. Using minimal dummy data for testing.');
+      this.loadDummyDataForTesting();
+    }
+  }
+
+  /**
+   * Set the current user from API response
+   * @param user - User to set as current
+   */
+  setCurrentUser(user: User | null): void {
+    this.currentUserSubject.next(user);
   }
 
   /**
@@ -51,11 +79,19 @@ export class RoleService {
   }
 
   /**
-   * Set the current user
-   * @param user - User to set as current
+   * Set all users from API response
+   * @param users - Array of all users
    */
-  setCurrentUser(user: User): void {
-    this.currentUserSubject.next(user);
+  setAllUsers(users: User[]): void {
+    this.allUsersSubject.next(users);
+  }
+
+  /**
+   * Get all users
+   * @returns Array of all users
+   */
+  getAllUsers(): User[] {
+    return this.allUsersSubject.value;
   }
 
   /**
@@ -95,11 +131,30 @@ export class RoleService {
   }
 
   /**
-   * Get all dummy users for testing/demo purposes
-   * @returns Array of dummy users
+   * Get users that current user can view
+   * - Admins and team leads can view all users
+   * - Sales executives can only view themselves
+   * @returns Array of users that current user can view
    */
-  getAllUsers(): User[] {
-    return [
+  getViewableUsers(): User[] {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser) return [];
+
+    const allUsers = this.getAllUsers();
+
+    if (this.isTeamLeadOrHigher()) {
+      return allUsers.filter(u => u.role === UserRole.SALES_EXECUTIVE || u.id === currentUser.id);
+    }
+
+    return allUsers.filter(u => u.id === currentUser.id);
+  }
+
+  /**
+   * Load minimal dummy data for testing in standalone mode
+   * This should be removed in production - data should come from API
+   */
+  private loadDummyDataForTesting(): void {
+    const dummyUsers: User[] = [
       {
         id: 'user-1',
         name: 'John Admin',
@@ -144,41 +199,9 @@ export class RoleService {
         managerId: 'user-3'
       }
     ];
-  }
 
-  /**
-   * Get users that current user can view
-   * - Admins and team leads can view all users
-   * - Sales executives can only view themselves
-   * @returns Array of users that current user can view
-   */
-  getViewableUsers(): User[] {
-    const currentUser = this.getCurrentUser();
-    if (!currentUser) return [];
-
-    const allUsers = this.getAllUsers();
-
-    if (this.isTeamLeadOrHigher()) {
-      return allUsers.filter(u => u.role === UserRole.SALES_EXECUTIVE || u.id === currentUser.id);
-    }
-
-    return allUsers.filter(u => u.id === currentUser.id);
-  }
-
-  /**
-   * Get a dummy user for testing
-   * In production, this would be replaced with actual authentication
-   * @returns A dummy user
-   */
-  private getDummyUser(): User {
-    // Return a sales executive by default for testing
-    return {
-      id: 'user-4',
-      name: 'Alice Sales',
-      email: 'alice.sales@company.com',
-      role: UserRole.SALES_EXECUTIVE,
-      teamId: 'team-1',
-      managerId: 'user-3'
-    };
+    this.setAllUsers(dummyUsers);
+    // Default to a sales executive for testing
+    this.setCurrentUser(dummyUsers[3]); // Alice Sales
   }
 }
