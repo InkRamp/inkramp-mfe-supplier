@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 import { MOCK_DATA } from '../data/mock-data';
 import { DATA_CONFIG } from '../config/data.config';
-import { API_CONFIG, getApiUrl } from '../config/api.config';
+import { API_CONFIG, getApiUrl, isApiConfigured } from '../config/api.config';
 import { GRAPHQL_CONFIG, getGraphQLHeaders } from '../graphql/graphql.config';
 import { SalesRecord, SalesSummary } from '@org/core-services';
 import { User } from '@org/core-services';
@@ -15,7 +15,7 @@ import { SALES_QUERIES, USER_QUERIES } from '../graphql/queries';
  * 
  * Provides data access with support for:
  * - GraphQL (when enabled)
- * - REST API (when GraphQL is disabled)
+ * - REST API (when enabled and GraphQL is disabled)
  * - Mock data (as fallback for testing)
  * 
  * All requests automatically include Bearer token via HTTP interceptor
@@ -35,7 +35,7 @@ export class DataService {
       }).pipe(
         map((response: any) => response.data.salesHistory)
       );
-    } else if (API_CONFIG.baseUrl !== 'https://api.example.com') {
+    } else if (isApiConfigured()) {
       // Use REST API if configured
       const url = getApiUrl(`${API_CONFIG.endpoints.sales}/history/${userId}`);
       const params: any = {};
@@ -53,7 +53,7 @@ export class DataService {
       return this.queryGraphQL(SALES_QUERIES.GET_SALES_SUMMARY, { userId }).pipe(
         map((response: any) => response.data.salesSummary)
       );
-    } else if (API_CONFIG.baseUrl !== 'https://api.example.com') {
+    } else if (isApiConfigured()) {
       // Use REST API if configured
       const url = getApiUrl(`${API_CONFIG.endpoints.sales}/summary/${userId}`);
       return this.http.get<SalesSummary>(url);
@@ -67,7 +67,7 @@ export class DataService {
       return this.queryGraphQL(SALES_QUERIES.GET_ALL_SALES).pipe(
         map((response: any) => response.data.allSales)
       );
-    } else if (API_CONFIG.baseUrl !== 'https://api.example.com') {
+    } else if (isApiConfigured()) {
       // Use REST API if configured
       const url = getApiUrl(API_CONFIG.endpoints.sales);
       return this.http.get<SalesRecord[]>(url);
@@ -81,7 +81,7 @@ export class DataService {
       return this.queryGraphQL(USER_QUERIES.GET_ALL_USERS).pipe(
         map((response: any) => response.data.users)
       );
-    } else if (API_CONFIG.baseUrl !== 'https://api.example.com') {
+    } else if (isApiConfigured()) {
       // Use REST API if configured
       const url = getApiUrl(API_CONFIG.endpoints.users);
       return this.http.get<User[]>(url);
@@ -95,7 +95,7 @@ export class DataService {
    * This should be called after authentication to get user details
    */
   getCurrentUser(): Observable<User> {
-    if (API_CONFIG.baseUrl !== 'https://api.example.com') {
+    if (isApiConfigured()) {
       const url = getApiUrl(`${API_CONFIG.endpoints.auth}/me`);
       return this.http.get<User>(url);
     } else {

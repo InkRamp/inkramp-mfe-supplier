@@ -6,6 +6,7 @@
  */
 
 export interface ApiConfig {
+  enabled: boolean;
   baseUrl: string;
   endpoints: {
     users: string;
@@ -17,10 +18,13 @@ export interface ApiConfig {
 /**
  * Default API configuration
  * 
- * For standalone mode: Set baseUrl to your API server
+ * For standalone mode: Set baseUrl to your API server and enabled to true
  * For SPA mode: These will work with Bearer tokens automatically via HTTP interceptor
  */
 export const API_CONFIG: ApiConfig = {
+  // Set to true when API is available
+  enabled: false,
+  
   // Update this to your API base URL
   baseUrl: 'https://api.example.com',
   
@@ -36,4 +40,11 @@ export const API_CONFIG: ApiConfig = {
  */
 export function getApiUrl(endpoint: string): string {
   return `${API_CONFIG.baseUrl}${endpoint}`;
+}
+
+/**
+ * Helper function to check if API is configured
+ */
+export function isApiConfigured(): boolean {
+  return API_CONFIG.enabled;
 }

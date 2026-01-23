@@ -24,6 +24,16 @@ export interface User {
   managerId?: string;
 }
 
+// Import DATA_CONFIG if available
+let USE_MOCK_DATA = false;
+try {
+  // This will be undefined in library context, defined when imported by app
+  const config = (globalThis as any).__DATA_CONFIG__;
+  USE_MOCK_DATA = config?.useMockData ?? false;
+} catch {
+  // Ignore errors - config not available
+}
+
 /**
  * Stateless Role-based Access Control Service
  * 
@@ -33,7 +43,7 @@ export interface User {
  * For debugging/testing in standalone mode:
  * - Temporarily holds user state in memory (BehaviorSubject)
  * - This state should be populated from API responses
- * - If no API, uses minimal dummy data only as fallback
+ * - Dummy data only loaded if DATA_CONFIG.useMockData is true
  * 
  * @Injectable providedIn: 'root' makes this service a singleton
  */
@@ -54,9 +64,8 @@ export class RoleService {
   constructor(@Optional() @Inject('DataService') dataService?: any) {
     this.dataService = dataService;
     
-    // For debugging in standalone mode without API, load minimal dummy data
-    // In production, this should be removed and data should come from API
-    if (!this.dataService) {
+    // Only load dummy data if explicitly enabled and no DataService is available
+    if (!this.dataService && USE_MOCK_DATA) {
       console.warn('[RoleService] No DataService found. Using minimal dummy data for testing.');
       this.loadDummyDataForTesting();
     }
@@ -151,7 +160,7 @@ export class RoleService {
 
   /**
    * Load minimal dummy data for testing in standalone mode
-   * This should be removed in production - data should come from API
+   * Only called when DATA_CONFIG.useMockData is true and no DataService is provided
    */
   private loadDummyDataForTesting(): void {
     const dummyUsers: User[] = [

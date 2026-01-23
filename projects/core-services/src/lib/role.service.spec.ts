@@ -14,9 +14,18 @@ describe('RoleService', () => {
   });
 
   it('should return current user', () => {
+    // Since dummy data isn't loaded by default anymore, set a user first
+    const testUser: User = {
+      id: 'user-1',
+      name: 'Test User',
+      email: 'test@example.com',
+      role: UserRole.SALES_EXECUTIVE
+    };
+    service.setCurrentUser(testUser);
+    
     const user = service.getCurrentUser();
     expect(user).toBeTruthy();
-    expect(user?.id).toBe('user-4');
+    expect(user?.id).toBe('user-1');
   });
 
   it('should set current user', () => {
@@ -102,10 +111,27 @@ describe('RoleService', () => {
     expect(service.isTeamLeadOrHigher()).toBe(false);
   });
 
-  it('should return all dummy users', () => {
-    const users = service.getAllUsers();
-    expect(users.length).toBeGreaterThan(0);
-    expect(users.every(u => u.id && u.name && u.email && u.role)).toBe(true);
+  it('should manage users list', () => {
+    // Test that we can set and get users
+    const users: User[] = [
+      {
+        id: 'user-1',
+        name: 'User 1',
+        email: 'user1@example.com',
+        role: UserRole.SALES_EXECUTIVE
+      },
+      {
+        id: 'user-2',
+        name: 'User 2',
+        email: 'user2@example.com',
+        role: UserRole.TEAM_LEAD
+      }
+    ];
+    
+    service.setAllUsers(users);
+    const retrievedUsers = service.getAllUsers();
+    expect(retrievedUsers.length).toBe(2);
+    expect(retrievedUsers.every(u => u.id && u.name && u.email && u.role)).toBe(true);
   });
 
   it('should return viewable users based on role - sales executive', () => {

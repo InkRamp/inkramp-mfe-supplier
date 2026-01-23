@@ -23,11 +23,13 @@ export class TokenService {
   /**
    * Set the Bearer token in localStorage
    * Useful for debugging - can copy/paste tokens and refresh
-   * @param token - The Bearer token to store
+   * @param token - The Bearer token to store (must not be empty)
    */
   setToken(token: string): void {
     if (token) {
       localStorage.setItem(this.TOKEN_KEY, token);
+    } else {
+      console.warn('[TokenService] Attempted to set empty token. Token not stored.');
     }
   }
 
