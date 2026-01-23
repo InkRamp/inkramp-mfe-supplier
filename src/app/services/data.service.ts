@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 import { MOCK_DATA } from '../data/mock-data';
 import { DATA_CONFIG } from '../config/data.config';
-import { API_CONFIG, getApiUrl, isApiConfigured } from '../config/api.config';
+import { API_CONFIG, getApiUrl, isApiConfigured, getIncentivesUrl } from '../config/api.config';
 import { GRAPHQL_CONFIG, getGraphQLHeaders } from '../graphql/graphql.config';
 import { SalesRecord, SalesSummary } from '@org/core-services';
 import { User } from '@org/core-services';
@@ -25,6 +25,21 @@ import { SALES_QUERIES, USER_QUERIES } from '../graphql/queries';
 })
 export class DataService {
   constructor(private http: HttpClient) {}
+
+  /**
+   * Get incentives for the organization from sessionStorage
+   * Uses the org/brandId stored in sessionStorage to construct the endpoint
+   * Example: GET /incentives/hdfc
+   */
+  getIncentives(): Observable<any> {
+    if (isApiConfigured()) {
+      const url = getIncentivesUrl();
+      return this.http.get<any>(url);
+    } else {
+      // Return mock incentives for testing
+      return of({ success: true, message: 'Mock data', data: [] }).pipe(delay(DATA_CONFIG.mockDataDelay || 300));
+    }
+  }
 
   getSalesHistory(userId: string, startDate?: Date, endDate?: Date): Observable<SalesRecord[]> {
     if (DATA_CONFIG.useGraphQL) {
