@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '@org/core-services';
+import { AuthService } from '../services/auth.service';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
