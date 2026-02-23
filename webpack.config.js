@@ -12,13 +12,12 @@ module.exports = withModuleFederationPlugin({
   //   ...shareAll({ singleton: true, strictVersion: true, requiredVersion: 'auto' }),
   // },
   shared: {
-    '@angular/core': { singleton: true, strictVersion: false, requiredVersion: 'auto' },
-    '@angular/common': { singleton: true, strictVersion: false, requiredVersion: 'auto' },
-    '@angular/common/http': { singleton: true, strictVersion: false, requiredVersion: 'auto' },
-    '@org/core-services': { singleton: false, strictVersion: false },
-    '@opensourcekd/ng-common-libs': { singleton: true, strictVersion: true, requiredVersion: 'auto' },
-    'rxjs': { singleton: true, strictVersion: false, requiredVersion: 'auto' }
-    // leave out @angular/router if the remote doesn't need it
+    '@angular/core': { singleton: true, strictVersion: true, requiredVersion: '18.2.13' },
+    '@angular/common': { singleton: true, strictVersion: true, requiredVersion: '18.2.13' },
+    '@angular/common/http': { singleton: true, strictVersion: true, requiredVersion: '18.2.13' },
+    '@org/core-services': { singleton: true, strictVersion: true, requiredVersion: 'auto' },
+    '@opensourcekd/ng-common-libs': { singleton: true, strictVersion: true, requiredVersion: '^2.0.11' },
+    'rxjs': { singleton: true, strictVersion: true, requiredVersion: '7.8.0' }
   },
 
 });
