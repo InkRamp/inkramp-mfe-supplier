@@ -2,15 +2,10 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
-import { 
-  RoleService, 
-  User, 
-  UserRole,
-  SalesDataService, 
-  SalesRecord, 
-  SalesSummary,
-  SalesStatus 
-} from '@org/core-services';
+import { RoleService } from '../services/role.service';
+import { User, UserRole } from '../models/user.models';
+import { SalesDataService } from '../services/sales-data.service';
+import { SalesRecord, SalesSummary, SalesStatus } from '../models/sales.models';
 
 /**
  * Sales History Component

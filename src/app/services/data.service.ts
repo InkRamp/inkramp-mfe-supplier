@@ -5,8 +5,8 @@ import { delay, map } from 'rxjs/operators';
 import { MOCK_DATA } from '../data/mock-data';
 import { DATA_CONFIG } from '../config/data.config';
 import { GRAPHQL_CONFIG, getGraphQLHeaders } from '../graphql/graphql.config';
-import { SalesRecord, SalesSummary } from '@org/core-services';
-import { User } from '@org/core-services';
+import { SalesRecord, SalesSummary } from '../models/sales.models';
+import { User } from '../models/user.models';
 import { SALES_QUERIES, USER_QUERIES } from '../graphql/queries';
 
 @Injectable({

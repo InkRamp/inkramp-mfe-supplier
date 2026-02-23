@@ -1,5 +1,5 @@
-import { SalesStatus, ProductCategory, SalesRecord } from '@org/core-services';
-import { User, UserRole } from '@org/core-services';
+import { SalesStatus, ProductCategory, SalesRecord } from '../models/sales.models';
+import { User, UserRole } from '../models/user.models';
 
 export interface MockDataSet {
   users: User[];
