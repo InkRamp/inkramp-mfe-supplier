@@ -16,6 +16,7 @@ module.exports = withModuleFederationPlugin({
     '@angular/common': { singleton: true, strictVersion: false, requiredVersion: 'auto' },
     '@angular/common/http': { singleton: true, strictVersion: false, requiredVersion: 'auto' },
     '@org/core-services': { singleton: true, strictVersion: true, requiredVersion: 'auto' },
+    '@opensourcekd/ng-common-libs': { singleton: true, strictVersion: true, requiredVersion: 'auto' },
     'rxjs': { singleton: true, strictVersion: false, requiredVersion: 'auto' }
     // leave out @angular/router if the remote doesn't need it
   },
