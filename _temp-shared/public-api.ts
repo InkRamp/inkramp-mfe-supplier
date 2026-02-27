@@ -15,3 +15,5 @@ import { Injectable } from '@angular/core';
 export class CoreServicesService {
   constructor() {}
 }
+
+export { authInterceptor } from './auth.interceptor';
