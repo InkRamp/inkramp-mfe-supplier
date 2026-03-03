@@ -3,7 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { SalesHistoryComponent } from './sales-history/sales-history.component';
-import { eventBus } from '../bootstrap';
+import { eventBus } from '../event-bus';
 
 @Component({
   selector: 'app-root',
