@@ -5,7 +5,7 @@ export interface DataConfig {
 }
 
 export const DATA_CONFIG: DataConfig = {
-  useGraphQL: false,
+  useGraphQL: true,
   graphqlEndpoint: 'https://api.example.com/graphql',
   mockDataDelay: 300
 };

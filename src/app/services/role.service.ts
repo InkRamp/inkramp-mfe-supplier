@@ -1,17 +1,24 @@
 import { Injectable, Inject, Optional } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { User, UserRole } from '../models/user.models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RoleService {
-  private currentUserSubject = new BehaviorSubject<User | null>(this.getDummyUser());
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$: Observable<User | null> = this.currentUserSubject.asObservable();
-  private dataService: any;
+  private allUsers: User[] = [];
 
   constructor(@Optional() @Inject('DataService') dataService?: any) {
-    this.dataService = dataService;
+    if (dataService) {
+      dataService.getAllUsers().pipe(
+        catchError(() => [])
+      ).subscribe((users: User[]) => {
+        this.allUsers = users;
+      });
+    }
   }
 
   getCurrentUser(): User | null {
@@ -41,34 +48,15 @@ export class RoleService {
   }
 
   getAllUsers(): User[] {
-    return [
-      { id: 'user-1', name: 'John Admin', email: 'john.admin@company.com', role: UserRole.SUPER_ADMIN },
-      { id: 'user-2', name: 'Sarah Manager', email: 'sarah.manager@company.com', role: UserRole.ORG_ADMIN },
-      { id: 'user-3', name: 'Mike Lead', email: 'mike.lead@company.com', role: UserRole.TEAM_LEAD, teamId: 'team-1' },
-      { id: 'user-4', name: 'Alice Sales', email: 'alice.sales@company.com', role: UserRole.SALES_EXECUTIVE, teamId: 'team-1', managerId: 'user-3' },
-      { id: 'user-5', name: 'Bob Sales', email: 'bob.sales@company.com', role: UserRole.SALES_EXECUTIVE, teamId: 'team-1', managerId: 'user-3' },
-      { id: 'user-6', name: 'Carol Sales', email: 'carol.sales@company.com', role: UserRole.SALES_EXECUTIVE, teamId: 'team-1', managerId: 'user-3' }
-    ];
+    return this.allUsers;
   }
 
   getViewableUsers(): User[] {
     const currentUser = this.getCurrentUser();
     if (!currentUser) return [];
-    const allUsers = this.getAllUsers();
     if (this.isTeamLeadOrHigher()) {
-      return allUsers.filter(u => u.role === UserRole.SALES_EXECUTIVE || u.id === currentUser.id);
+      return this.allUsers.filter(u => u.role === UserRole.SALES_EXECUTIVE || u.id === currentUser.id);
     }
-    return allUsers.filter(u => u.id === currentUser.id);
-  }
-
-  private getDummyUser(): User {
-    return {
-      id: 'user-4',
-      name: 'John Doe',
-      email: 'john.doe@company.com',
-      role: UserRole.SALES_EXECUTIVE,
-      teamId: 'team-1',
-      managerId: 'user-3'
-    };
+    return this.allUsers.filter(u => u.id === currentUser.id);
   }
 }

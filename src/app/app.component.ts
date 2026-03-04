@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { SalesHistoryComponent } from './sales-history/sales-history.component';
+import { RoleService } from './services/role.service';
 import { eventBus } from '../event-bus';
 
 @Component({
@@ -17,7 +18,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private subscriptions = new Subscription();
 
-  constructor() {
+  constructor(private roleService: RoleService) {
     console.log("In mfe-MY_SALES constructor");
   }
 
@@ -26,6 +27,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       eventBus.on('auth:login_success').subscribe((user: any) => {
         console.log('[mfe-MY_SALES] User logged in:', user);
+        this.roleService.setCurrentUser(user);
       })
     );
   }
