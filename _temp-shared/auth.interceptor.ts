@@ -1,9 +1,9 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 
-const TOKEN_KEY = 'zitadel_token';
+const TOKEN_KEY = 'auth0_access_token';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = sessionStorage.getItem(TOKEN_KEY);
 
   if (token) {
     const authReq = req.clone({

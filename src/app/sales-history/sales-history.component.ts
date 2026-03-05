@@ -1,17 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
-import { takeUntil, tap } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
+import { DataService } from '../services/data.service';
 import { RoleService } from '../services/role.service';
-import { User, UserRole } from '../models/user.models';
-import { SalesDataService } from '../services/sales-data.service';
-import { SalesRecord, SalesSummary, SalesStatus } from '../models/sales.models';
+import { IncentiveRecord } from '../models/incentive.model';
 
-/**
- * Sales History Component
- * Displays sales history for the current user or selected user (for admins/team leads)
- * Supports role-based access control
- */
 @Component({
   selector: 'app-sales-history',
   standalone: true,
@@ -20,134 +14,84 @@ import { SalesRecord, SalesSummary, SalesStatus } from '../models/sales.models';
   styleUrl: './sales-history.component.scss'
 })
 export class SalesHistoryComponent implements OnInit, OnDestroy {
-  currentUser: User | null = null;
-  salesRecords: SalesRecord[] = [];
-  salesSummary: SalesSummary | null = null;
-  selectedUserId: string | null = null;
-  viewableUsers: User[] = [];
+  incentiveRecords: IncentiveRecord[] = [];
   isLoading = false;
-  
-  // Expose enums to template
-  SalesStatus = SalesStatus;
-  
+  errorMessage: string | null = null;
+  currentUser: any = null;
+
   private destroy$ = new Subject<void>();
 
   constructor(
-    private roleService: RoleService,
-    private salesDataService: SalesDataService
+    private dataService: DataService,
+    private roleService: RoleService
   ) {}
 
-  /**
-   * Initialize component
-   * - Get current user
-   * - Load viewable users for role-based filtering
-   * - Load initial sales data
-   */
   ngOnInit(): void {
-    this.roleService.currentUser$
-      .pipe(takeUntil(this.destroy$),tap(e=>{
-        console.log("In sales history the role service is ...",e)
-      }))
-      .subscribe(user => {
-        this.currentUser = user;
-        if (user) {
-          this.selectedUserId = user.id;
-          this.viewableUsers = this.roleService.getViewableUsers();
-          this.loadSalesData(user.id);
-        }
-      });
+    this.currentUser = this.roleService.getCurrentUser();
+    this.loadIncentives();
   }
 
-  /**
-   * Cleanup subscriptions
-   */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  /**
-   * Load sales data for a specific user
-   * @param userId - User ID to load sales data for
-   */
-  loadSalesData(userId: string): void {
+  loadIncentives(): void {
     this.isLoading = true;
-    this.selectedUserId = userId;
-
-    this.salesDataService.getSalesHistory(userId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(records => {
-        this.salesRecords = records;
-        this.isLoading = false;
-      });
-
-    this.salesDataService.getSalesSummary(userId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(summary => {
-        this.salesSummary = summary;
-      });
-  }
-
-  /**
-   * Handle user selection change
-   * @param event - Change event from select element
-   */
-  onUserChange(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    const userId = select.value;
-    if (userId) {
-      this.loadSalesData(userId);
+    this.errorMessage = null;
+    try {
+      this.dataService.getIncentives()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: records => {
+            this.incentiveRecords = records;
+            this.isLoading = false;
+          },
+          error: err => {
+            console.error('[SalesHistoryComponent] Error loading incentives:', err);
+            this.errorMessage = err.message || 'Failed to load incentives';
+            this.isLoading = false;
+          }
+        });
+    } catch (err: any) {
+      console.error('[SalesHistoryComponent] Exception:', err);
+      this.errorMessage = err.message || 'Failed to load incentives';
+      this.isLoading = false;
     }
   }
 
-  /**
-   * Check if current user can view multiple users
-   * @returns true if user is team lead or admin
-   */
-  canViewMultipleUsers(): boolean {
-    return this.roleService.isTeamLeadOrHigher();
+  getRuleName(ruleId: any): string {
+    if (!ruleId) return 'N/A';
+    if (typeof ruleId === 'object' && ruleId.name) return ruleId.name;
+    if (typeof ruleId === 'object' && ruleId._id) return ruleId._id;
+    return String(ruleId);
   }
 
-  /**
-   * Get status badge class
-   * @param status - Sales status
-   * @returns CSS class for status badge
-   */
-  getStatusClass(status: SalesStatus): string {
-    switch (status) {
-      case SalesStatus.COMPLETED:
-        return 'status-completed';
-      case SalesStatus.PENDING:
-        return 'status-pending';
-      case SalesStatus.CANCELLED:
-        return 'status-cancelled';
-      default:
-        return '';
+  formatDate(dateStr: string | undefined): string {
+    if (!dateStr) return 'N/A';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return 'N/A';
+      return d.toLocaleDateString('en-US', {
+        year: 'numeric', month: 'short', day: 'numeric'
+      });
+    } catch {
+      return 'N/A';
     }
   }
 
-  /**
-   * Format currency
-   * @param amount - Amount to format
-   * @returns Formatted currency string
-   */
-  formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+  formatCurrency(amount: number | undefined): string {
+    if (amount == null) return '—';
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
   }
 
-  /**
-   * Format date
-   * @param date - Date to format
-   * @returns Formatted date string
-   */
-  formatDate(date: Date): string {
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }).format(new Date(date));
+  getStatusClass(status: string | undefined): string {
+    switch (status?.toLowerCase()) {
+      case 'completed': case 'approved': case 'active': return 'status-completed';
+      case 'pending': return 'status-pending';
+      case 'cancelled': case 'rejected': case 'inactive': return 'status-cancelled';
+      default: return '';
+    }
   }
 }
+
