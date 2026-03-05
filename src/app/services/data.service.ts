@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { APP_CONFIG } from '@opensourcekd/ng-common-libs';
+import { APP_CONFIG, STORAGE_CONFIG, STORAGE_KEYS, getDecodedToken } from '@opensourcekd/ng-common-libs';
 import { IncentiveRecord } from '../models/incentive.model';
 
 const API_BASE = `${APP_CONFIG.apiUrl}/db`;
@@ -14,7 +14,10 @@ export class DataService {
   constructor(private http: HttpClient) {}
 
   getIncentives(): Observable<IncentiveRecord[]> {
-    const orgOrBrand = sessionStorage.getItem('org') || sessionStorage.getItem('brandId');
+    const decoded = getDecodedToken(STORAGE_KEYS, STORAGE_CONFIG);
+    const orgAndRoles = decoded?.['org_and_roles'] as Record<string, unknown> | undefined;
+    const orgOrBrand = orgAndRoles ? Object.keys(orgAndRoles)[0] : null;
+
     if (!orgOrBrand) {
       throw new Error("Organization not found in sessionStorage. Expected 'org' or 'brandId' key.");
     }
