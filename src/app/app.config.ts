@@ -1,13 +1,28 @@
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, APP_INITIALIZER } from '@angular/core';
 import { provideRouter, withHashLocation } from '@angular/router';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { authInterceptor } from '@org/core-services';
+import { provideHttpClient } from '@angular/common/http';
+import { BearerTokenInterceptor, APP_CONFIG, STORAGE_KEYS } from '@opensourcekd/ng-common-libs';
 
 import { routes } from './app.routes';
+
+function initBearerTokenInterceptor(): () => void {
+  return () => {
+    const interceptor = BearerTokenInterceptor.getInstance('mfe-MY_SALES', {
+      apiUrl: APP_CONFIG.apiUrl,
+      getToken: () => sessionStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN),
+    });
+    interceptor.activate();
+  };
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes, withHashLocation()),
-    provideHttpClient(withInterceptors([authInterceptor]))
+    provideHttpClient(),
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initBearerTokenInterceptor,
+      multi: true,
+    },
   ]
 };
