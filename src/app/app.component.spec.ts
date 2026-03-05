@@ -29,3 +29,4 @@ describe('AppComponent', () => {
     expect(compiled.querySelector('app-sales-history')).toBeTruthy();
   });
 });
+

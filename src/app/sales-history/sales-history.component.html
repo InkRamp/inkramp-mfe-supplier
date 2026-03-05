@@ -1,108 +1,72 @@
-<div class="sales-history-container">
+<div class="incentives-container">
   <div class="header">
-    <h1>Sales History</h1>
+    <h1>💰 Incentives Dashboard</h1>
     <p class="subtitle" *ngIf="currentUser">
-      Viewing sales for: <strong>{{ selectedUserId === currentUser.id ? 'You' : (viewableUsers | json) }}</strong>
+      Logged in as: <strong>{{ currentUser.name || currentUser.email }}</strong>
     </p>
-  </div>
-
-  <!-- User selector for admins and team leads -->
-  <div class="user-selector" *ngIf="canViewMultipleUsers() && viewableUsers.length > 0">
-    <label for="userSelect">Select Sales Executive:</label>
-    <select id="userSelect" (change)="onUserChange($event)" [value]="selectedUserId || ''">
-      <option *ngFor="let user of viewableUsers" [value]="user.id">
-        {{ user.name }} ({{ user.email }})
-      </option>
-    </select>
-  </div>
-
-  <!-- Sales Summary -->
-  <div class="summary-cards" *ngIf="salesSummary">
-    <div class="summary-card">
-      <div class="card-icon completed">💰</div>
-      <div class="card-content">
-        <p class="card-label">Total Sales</p>
-        <p class="card-value">{{ formatCurrency(salesSummary.totalSales) }}</p>
-      </div>
-    </div>
-    
-    <div class="summary-card">
-      <div class="card-icon commission">💵</div>
-      <div class="card-content">
-        <p class="card-label">Total Commission</p>
-        <p class="card-value">{{ formatCurrency(salesSummary.totalCommission) }}</p>
-      </div>
-    </div>
-    
-    <div class="summary-card">
-      <div class="card-icon info">✅</div>
-      <div class="card-content">
-        <p class="card-label">Completed</p>
-        <p class="card-value">{{ salesSummary.completedCount }}</p>
-      </div>
-    </div>
-    
-    <div class="summary-card">
-      <div class="card-icon warning">⏳</div>
-      <div class="card-content">
-        <p class="card-label">Pending</p>
-        <p class="card-value">{{ salesSummary.pendingCount }}</p>
-      </div>
-    </div>
-    
-    <div class="summary-card">
-      <div class="card-icon danger">❌</div>
-      <div class="card-content">
-        <p class="card-label">Cancelled</p>
-        <p class="card-value">{{ salesSummary.cancelledCount }}</p>
-      </div>
-    </div>
   </div>
 
   <!-- Loading indicator -->
   <div class="loading" *ngIf="isLoading">
     <div class="spinner"></div>
-    <p>Loading sales data...</p>
+    <p>Loading incentives...</p>
   </div>
 
-  <!-- Sales Records Table -->
-  <div class="sales-table-container" *ngIf="!isLoading && salesRecords.length > 0">
-    <table class="sales-table">
+  <!-- Error state -->
+  <div class="error-state" *ngIf="errorMessage && !isLoading">
+    <div class="error-icon">⚠️</div>
+    <h2>Error Loading Incentives</h2>
+    <p>{{ errorMessage }}</p>
+    <button class="retry-button" (click)="loadIncentives()">Retry</button>
+  </div>
+
+  <!-- Incentives Table -->
+  <div class="table-container" *ngIf="!isLoading && !errorMessage && incentiveRecords.length > 0">
+    <div class="stats">
+      <span class="stat-badge">Total Records: {{ incentiveRecords.length }}</span>
+    </div>
+    <table class="incentives-table">
       <thead>
         <tr>
-          <th>Date</th>
-          <th>Client</th>
-          <th>Product</th>
-          <th>Category</th>
-          <th>Region</th>
+          <th>#</th>
+          <th>ID</th>
+          <th>Brand</th>
+          <th>User ID</th>
+          <th>Rule</th>
           <th>Amount</th>
-          <th>Commission</th>
           <th>Status</th>
+          <th>Created</th>
+          <th>Updated</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let record of salesRecords">
-          <td>{{ formatDate(record.date) }}</td>
-          <td>{{ record.clientName }}</td>
-          <td>{{ record.productName }}</td>
-          <td>{{ record.productCategory }}</td>
-          <td>{{ record.region }}</td>
-          <td class="amount">{{ formatCurrency(record.amount) }}</td>
-          <td class="commission">{{ formatCurrency(record.commission) }}</td>
+        <tr *ngFor="let record of incentiveRecords; let i = index" class="table-row">
+          <td class="row-number">{{ i + 1 }}</td>
+          <td class="record-id">{{ record._id }}</td>
+          <td>{{ record.brandId || 'N/A' }}</td>
+          <td class="user-id">{{ record.userId || 'N/A' }}</td>
+          <td>{{ getRuleName(record.ruleId) }}</td>
+          <td class="amount">
+            <span *ngIf="record.amount != null">{{ formatCurrency(record.amount) }}</span>
+            <span *ngIf="record.amount == null">—</span>
+          </td>
           <td>
             <span class="status-badge" [ngClass]="getStatusClass(record.status)">
-              {{ record.status }}
+              {{ record.status || 'N/A' }}
             </span>
           </td>
+          <td class="date">{{ formatDate(record.createdAt) }}</td>
+          <td class="date">{{ formatDate(record.updatedAt) }}</td>
         </tr>
       </tbody>
     </table>
   </div>
 
   <!-- Empty state -->
-  <div class="empty-state" *ngIf="!isLoading && salesRecords.length === 0">
-    <div class="empty-icon">📊</div>
-    <h2>No Sales Records Found</h2>
-    <p>There are no sales records to display at this time.</p>
+  <div class="empty-state" *ngIf="!isLoading && !errorMessage && incentiveRecords.length === 0">
+    <div class="empty-icon">📭</div>
+    <h2>No Incentive Records Found</h2>
+    <p>There are no incentive records available at this time.</p>
   </div>
 </div>
+

@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { GRAPHQL_CONFIG, getGraphQLHeaders } from '../graphql/graphql.config';
-import { SalesRecord, SalesSummary } from '../models/sales.models';
-import { User } from '../models/user.models';
-import { SALES_QUERIES, USER_QUERIES } from '../graphql/queries';
+import { APP_CONFIG } from '@opensourcekd/ng-common-libs';
+import { IncentiveRecord } from '../models/incentive.model';
+
+const API_BASE = `${APP_CONFIG.apiUrl}/db`;
 
 @Injectable({
   providedIn: 'root'
@@ -13,44 +13,18 @@ import { SALES_QUERIES, USER_QUERIES } from '../graphql/queries';
 export class DataService {
   constructor(private http: HttpClient) {}
 
-  getSalesHistory(userId: string, startDate?: Date, endDate?: Date): Observable<SalesRecord[]> {
-    return this.queryGraphQL(SALES_QUERIES.GET_SALES_HISTORY, {
-      userId,
-      startDate: startDate?.toISOString(),
-      endDate: endDate?.toISOString()
-    }).pipe(
-      map((response: any) => response.data.salesHistory)
-    );
-  }
-
-  getSalesSummary(userId: string): Observable<SalesSummary> {
-    return this.queryGraphQL(SALES_QUERIES.GET_SALES_SUMMARY, { userId }).pipe(
-      map((response: any) => response.data.salesSummary)
-    );
-  }
-
-  getAllSales(): Observable<SalesRecord[]> {
-    return this.queryGraphQL(SALES_QUERIES.GET_ALL_SALES).pipe(
-      map((response: any) => response.data.allSales)
-    );
-  }
-
-  getAllUsers(): Observable<User[]> {
-    return this.queryGraphQL(USER_QUERIES.GET_ALL_USERS).pipe(
-      map((response: any) => response.data.users)
-    );
-  }
-
-  private queryGraphQL(query: string, variables?: any): Observable<any> {
-    const headers = getGraphQLHeaders();
-
-    return this.http.post(
-      GRAPHQL_CONFIG.endpoint,
-      {
-        query,
-        variables
-      },
-      { headers }
+  getIncentives(): Observable<IncentiveRecord[]> {
+    const orgOrBrand = sessionStorage.getItem('org') || sessionStorage.getItem('brandId');
+    if (!orgOrBrand) {
+      throw new Error("Organization not found in sessionStorage. Expected 'org' or 'brandId' key.");
+    }
+    return this.http.get<any>(`${API_BASE}/incentives/${orgOrBrand}`).pipe(
+      map(response => {
+        if (response?.data && Array.isArray(response.data)) return response.data;
+        if (Array.isArray(response)) return response;
+        return [];
+      })
     );
   }
 }
+
