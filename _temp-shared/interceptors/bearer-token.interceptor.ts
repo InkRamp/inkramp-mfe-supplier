@@ -1,6 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { AuthService, APP_CONFIG } from '@opensourcekd/ng-common-libs';
+import { APP_CONFIG } from '@opensourcekd/ng-common-libs';
+
+const TOKEN_KEY = 'auth0_access_token';
 
 /**
  * Angular HTTP interceptor that attaches a Bearer token to every request
@@ -18,8 +19,7 @@ import { AuthService, APP_CONFIG } from '@opensourcekd/ng-common-libs';
  *   provideHttpClient(withFetch(), withInterceptors([bearerTokenInterceptor]))
  */
 export const bearerTokenInterceptor: HttpInterceptorFn = (req, next) => {
-  const authService = inject(AuthService);
-  const token = authService.getTokenSync();
+  const token = sessionStorage.getItem(TOKEN_KEY);
 
   const apiBase = APP_CONFIG.apiUrl.endsWith('/') ? APP_CONFIG.apiUrl : `${APP_CONFIG.apiUrl}/`;
 
