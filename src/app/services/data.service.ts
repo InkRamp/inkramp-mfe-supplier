@@ -23,8 +23,12 @@ export class DataService {
     }
     return this.http.get<any>(`${API_BASE}/incentives/${orgOrBrand}`).pipe(
       map(response => {
-        if (response?.data && Array.isArray(response.data)) return response.data;
-        if (Array.isArray(response)) return response;
+        let parsed = response;
+        if (typeof response?.body === 'string') {
+          try { parsed = JSON.parse(response.body); } catch { parsed = response; }
+        }
+        if (parsed?.data && Array.isArray(parsed.data)) return parsed.data;
+        if (Array.isArray(parsed)) return parsed;
         return [];
       })
     );
