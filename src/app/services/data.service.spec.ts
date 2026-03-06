@@ -87,6 +87,23 @@ describe('DataService', () => {
     req.flush(mockRecords);
   });
 
+  it('should unwrap AWS Lambda Proxy Integration envelope when body is a JSON string', () => {
+    sessionStorage.setItem(STORAGE_KEYS.DECODED_TOKEN, JSON.stringify({ org_and_roles: { 'hdfc': ['admin'] } }));
+    const mockRecords = [{ _id: 'inc-lambda-1', amount: 2500 }];
+
+    service.getIncentives().subscribe(records => {
+      expect(records.length).toBe(1);
+      expect(records[0]._id).toBe('inc-lambda-1');
+    });
+
+    const req = httpMock.expectOne(`${API_BASE}/incentives/hdfc`);
+    req.flush({
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ success: true, message: 'Success', data: mockRecords })
+    });
+  });
+
   it('should return empty array for unexpected response shape', () => {
     sessionStorage.setItem(STORAGE_KEYS.DECODED_TOKEN, JSON.stringify({ org_and_roles: { 'brand-xyz': ['user'] } }));
 
