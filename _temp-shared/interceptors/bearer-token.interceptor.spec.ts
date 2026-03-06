@@ -8,27 +8,25 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
-import { APP_CONFIG } from '@opensourcekd/ng-common-libs';
+import { AuthService, APP_CONFIG } from '@opensourcekd/ng-common-libs';
 import { bearerTokenInterceptor } from './bearer-token.interceptor';
 
 const API_URL = APP_CONFIG.apiUrl;
-const TOKEN_KEY = 'auth0_access_token';
 
 describe('bearerTokenInterceptor', () => {
   let http: HttpClient;
   let controller: HttpTestingController;
+  let authServiceSpy: jasmine.SpyObj<AuthService>;
 
   function setup(token: string | null) {
-    if (token) {
-      sessionStorage.setItem(TOKEN_KEY, token);
-    } else {
-      sessionStorage.removeItem(TOKEN_KEY);
-    }
+    authServiceSpy = jasmine.createSpyObj<AuthService>('AuthService', ['getTokenSync']);
+    authServiceSpy.getTokenSync.and.returnValue(token);
 
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(withInterceptors([bearerTokenInterceptor])),
         provideHttpClientTesting(),
+        { provide: AuthService, useValue: authServiceSpy },
       ],
     });
 
@@ -36,10 +34,7 @@ describe('bearerTokenInterceptor', () => {
     controller = TestBed.inject(HttpTestingController);
   }
 
-  afterEach(() => {
-    controller.verify();
-    sessionStorage.removeItem(TOKEN_KEY);
-  });
+  afterEach(() => controller.verify());
 
   it('adds Authorization header when token exists and URL matches API base', () => {
     setup('test-token');
