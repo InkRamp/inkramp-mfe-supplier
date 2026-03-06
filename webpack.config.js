@@ -18,7 +18,7 @@ module.exports = withModuleFederationPlugin({
     '@org/core-services': { singleton: true, strictVersion: true, requiredVersion: 'auto' },
     '@opensourcekd/ng-common-libs': { singleton: true, strictVersion: true, requiredVersion: '^2.2.0' },
     'rxjs': { singleton: true, strictVersion: true, requiredVersion: '7.8.0' },
-    'zone.js': { singleton: true, strictVersion: true, requiredVersion: '~0.14.3' },
+    'zone.js': { singleton: true, strictVersion: true, requiredVersion: '~0.14.3', eager: true },
   },
 
 });
