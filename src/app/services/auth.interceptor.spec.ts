@@ -1,59 +1,74 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { authInterceptor } from '@org/core-services';
+import { AuthService, APP_CONFIG } from '@opensourcekd/ng-common-libs';
+import { bearerTokenInterceptor } from '@org/core-services';
 
-const TOKEN_KEY = 'auth0_access_token';
+const API_URL = APP_CONFIG.apiUrl;
 
-describe('authInterceptor', () => {
+describe('bearerTokenInterceptor', () => {
   let httpMock: HttpTestingController;
   let httpClient: HttpClient;
+  let authServiceSpy: jasmine.SpyObj<AuthService>;
 
-  beforeEach(() => {
+  function setup(token: string | null) {
+    authServiceSpy = jasmine.createSpyObj<AuthService>('AuthService', ['getTokenSync']);
+    authServiceSpy.getTokenSync.and.returnValue(token);
+
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(withInterceptors([authInterceptor])),
-        provideHttpClientTesting()
+        provideHttpClient(withInterceptors([bearerTokenInterceptor])),
+        provideHttpClientTesting(),
+        { provide: AuthService, useValue: authServiceSpy },
       ]
     });
 
     httpMock = TestBed.inject(HttpTestingController);
     httpClient = TestBed.inject(HttpClient);
-    sessionStorage.removeItem(TOKEN_KEY);
-  });
+  }
 
   afterEach(() => {
     httpMock.verify();
-    sessionStorage.removeItem(TOKEN_KEY);
   });
 
-  it('should add Authorization header when token is present', () => {
-    sessionStorage.setItem(TOKEN_KEY, 'test-token-123');
+  it('should add Authorization header when token exists and URL matches API base', () => {
+    setup('test-token-123');
 
-    httpClient.get('/api/test').subscribe();
+    httpClient.get(`${API_URL}/items`).subscribe();
 
-    const req = httpMock.expectOne('/api/test');
+    const req = httpMock.expectOne(`${API_URL}/items`);
     expect(req.request.headers.get('Authorization')).toBe('Bearer test-token-123');
     req.flush({});
   });
 
-  it('should not add Authorization header when token is absent', () => {
-    httpClient.get('/api/test').subscribe();
+  it('should not add Authorization header when token is null', () => {
+    setup(null);
 
-    const req = httpMock.expectOne('/api/test');
+    httpClient.get(`${API_URL}/items`).subscribe();
+
+    const req = httpMock.expectOne(`${API_URL}/items`);
+    expect(req.request.headers.has('Authorization')).toBeFalse();
+    req.flush({});
+  });
+
+  it('should not add Authorization header for non-API URLs', () => {
+    setup('test-token-123');
+
+    httpClient.get('https://other-domain.example.com/data').subscribe();
+
+    const req = httpMock.expectOne('https://other-domain.example.com/data');
     expect(req.request.headers.has('Authorization')).toBeFalse();
     req.flush({});
   });
 
   it('should not modify other request headers', () => {
-    sessionStorage.setItem(TOKEN_KEY, 'test-token-123');
+    setup('test-token-123');
 
-    httpClient.get('/api/test', { headers: { 'X-Custom-Header': 'custom-value' } }).subscribe();
+    httpClient.get(`${API_URL}/items`, { headers: { 'X-Custom-Header': 'custom-value' } }).subscribe();
 
-    const req = httpMock.expectOne('/api/test');
+    const req = httpMock.expectOne(`${API_URL}/items`);
     expect(req.request.headers.get('Authorization')).toBe('Bearer test-token-123');
     expect(req.request.headers.get('X-Custom-Header')).toBe('custom-value');
     req.flush({});
   });
 });
-
