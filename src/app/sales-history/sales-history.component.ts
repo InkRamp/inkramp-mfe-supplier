@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -23,8 +23,7 @@ export class SalesHistoryComponent implements OnInit, OnDestroy {
 
   constructor(
     private dataService: DataService,
-    private roleService: RoleService,
-    private ngZone: NgZone
+    private roleService: RoleService
   ) {}
 
   ngOnInit(): void {
@@ -45,17 +44,13 @@ export class SalesHistoryComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: records => {
-            this.ngZone.run(() => {
-              this.incentiveRecords = records;
-              this.isLoading = false;
-            });
+            this.incentiveRecords = records;
+            this.isLoading = false;
           },
           error: err => {
             console.error('[SalesHistoryComponent] Error loading incentives:', err);
-            this.ngZone.run(() => {
-              this.errorMessage = err.message || 'Failed to load incentives';
-              this.isLoading = false;
-            });
+            this.errorMessage = err.message || 'Failed to load incentives';
+            this.isLoading = false;
           }
         });
     } catch (err: any) {
