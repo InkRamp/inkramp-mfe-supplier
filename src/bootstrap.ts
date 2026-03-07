@@ -31,11 +31,21 @@ const authService = new AuthService(
 
 export { eventBus };
 
-bootstrapApplication(AppComponent, {
-  providers: [
-    provideRouter(routes, withHashLocation()),
-    provideHttpClient(withInterceptors([bearerTokenInterceptor])),
-    { provide: EventBus, useValue: eventBus },
-    { provide: AuthService, useValue: authService },
-  ],
-}).catch((err) => console.error('In bootstrap.ts of mfe-MY_SALES', err));
+// In standalone mode, Auth0 redirects back to this app with ?code=...&state=... in the URL.
+// ensureInitialized() processes any pending callback (exchanges the code for tokens and
+// stores auth0_access_token + auth0_decoded_token in sessionStorage) before Angular
+// renders any components. Without this, SalesHistoryComponent fires loadIncentives()
+// before the access token is available, so the bearer interceptor sends unauthenticated
+// requests and the API returns empty data.
+authService.ensureInitialized()
+  .then(() =>
+    bootstrapApplication(AppComponent, {
+      providers: [
+        provideRouter(routes, withHashLocation()),
+        provideHttpClient(withInterceptors([bearerTokenInterceptor])),
+        { provide: EventBus, useValue: eventBus },
+        { provide: AuthService, useValue: authService },
+      ],
+    })
+  )
+  .catch((err) => console.error('In bootstrap.ts of mfe-MY_SALES', err));
