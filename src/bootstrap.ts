@@ -31,13 +31,18 @@ const authService = new AuthService(
 
 export { eventBus };
 
-// In standalone mode, Auth0 redirects back to this app with ?code=...&state=... in the URL.
-// ensureInitialized() processes any pending callback (exchanges the code for tokens and
-// stores auth0_access_token + auth0_decoded_token in sessionStorage) before Angular
-// renders any components. Without this, SalesHistoryComponent fires loadIncentives()
-// before the access token is available, so the bearer interceptor sends unauthenticated
-// requests and the API returns empty data.
-authService.ensureInitialized()
+// In standalone mode, Auth0 redirects back with ?code=...&state=... after login.
+// We detect the callback URL params and call the public handleCallback() before Angular
+// renders any components, so auth0_access_token is stored in sessionStorage before
+// SalesHistoryComponent fires loadIncentives() and the bearer interceptor runs.
+const urlParams = new URLSearchParams(window.location.search);
+const hasAuthCallback = urlParams.has('code') && urlParams.has('state');
+
+const authCallbackPromise: Promise<unknown> = hasAuthCallback
+  ? authService.handleCallback()
+  : Promise.resolve();
+
+authCallbackPromise
   .then(() =>
     bootstrapApplication(AppComponent, {
       providers: [
