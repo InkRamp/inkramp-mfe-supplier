@@ -1,13 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { delay, map } from 'rxjs/operators';
-import { MOCK_DATA } from '../data/mock-data';
-import { DATA_CONFIG } from '../config/data.config';
-import { GRAPHQL_CONFIG, getGraphQLHeaders } from '../graphql/graphql.config';
-import { SalesRecord, SalesSummary } from '../models/sales.models';
-import { User } from '../models/user.models';
-import { SALES_QUERIES, USER_QUERIES } from '../graphql/queries';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { APP_CONFIG, STORAGE_CONFIG, STORAGE_KEYS, getDecodedToken } from '@opensourcekd/ng-common-libs';
+import { IncentiveRecord } from '../models/incentive.model';
+
+const API_BASE = `${APP_CONFIG.apiUrl}/db`;
 
 @Injectable({
   providedIn: 'root'
@@ -15,100 +13,25 @@ import { SALES_QUERIES, USER_QUERIES } from '../graphql/queries';
 export class DataService {
   constructor(private http: HttpClient) {}
 
-  getSalesHistory(userId: string, startDate?: Date, endDate?: Date): Observable<SalesRecord[]> {
-    if (DATA_CONFIG.useGraphQL) {
-      return this.queryGraphQL(SALES_QUERIES.GET_SALES_HISTORY, {
-        userId,
-        startDate: startDate?.toISOString(),
-        endDate: endDate?.toISOString()
-      }).pipe(
-        map((response: any) => response.data.salesHistory)
-      );
-    } else {
-      return this.getMockSalesHistory(userId, startDate, endDate);
-    }
-  }
+  getIncentives(): Observable<IncentiveRecord[]> {
+    const decoded = getDecodedToken(STORAGE_KEYS, STORAGE_CONFIG);
+    const orgAndRoles = decoded?.['org_and_roles'] as Record<string, unknown> | undefined;
+    const orgOrBrand = orgAndRoles ? Object.keys(orgAndRoles)[0] : null;
 
-  getSalesSummary(userId: string): Observable<SalesSummary> {
-    if (DATA_CONFIG.useGraphQL) {
-      return this.queryGraphQL(SALES_QUERIES.GET_SALES_SUMMARY, { userId }).pipe(
-        map((response: any) => response.data.salesSummary)
-      );
-    } else {
-      return this.getMockSalesSummary(userId);
+    if (!orgOrBrand) {
+      throw new Error("Organization not found in sessionStorage. Expected 'org' or 'brandId' key.");
     }
-  }
-
-  getAllSales(): Observable<SalesRecord[]> {
-    if (DATA_CONFIG.useGraphQL) {
-      return this.queryGraphQL(SALES_QUERIES.GET_ALL_SALES).pipe(
-        map((response: any) => response.data.allSales)
-      );
-    } else {
-      return this.getMockAllSales();
-    }
-  }
-
-  getAllUsers(): Observable<User[]> {
-    if (DATA_CONFIG.useGraphQL) {
-      return this.queryGraphQL(USER_QUERIES.GET_ALL_USERS).pipe(
-        map((response: any) => response.data.users)
-      );
-    } else {
-      return this.getMockUsers();
-    }
-  }
-
-  private queryGraphQL(query: string, variables?: any): Observable<any> {
-    const headers = getGraphQLHeaders();
-    
-    return this.http.post(
-      GRAPHQL_CONFIG.endpoint,
-      {
-        query,
-        variables
-      },
-      { headers }
+    return this.http.get<any>(`${API_BASE}/incentives/${orgOrBrand}`).pipe(
+      map(response => {
+        let parsed = response;
+        if (typeof response?.body === 'string') {
+          try { parsed = JSON.parse(response.body); } catch { parsed = response; }
+        }
+        if (parsed?.data && Array.isArray(parsed.data)) return parsed.data;
+        if (Array.isArray(parsed)) return parsed;
+        return [];
+      })
     );
   }
-
-  private getMockSalesHistory(userId: string, startDate?: Date, endDate?: Date): Observable<SalesRecord[]> {
-    let filtered = MOCK_DATA.salesRecords.filter(sale => sale.salesExecutiveId === userId);
-
-    if (startDate) {
-      filtered = filtered.filter(sale => sale.date >= startDate);
-    }
-
-    if (endDate) {
-      filtered = filtered.filter(sale => sale.date <= endDate);
-    }
-
-    return of(filtered).pipe(delay(DATA_CONFIG.mockDataDelay || 300));
-  }
-
-  private getMockSalesSummary(userId: string): Observable<SalesSummary> {
-    const userSales = MOCK_DATA.salesRecords.filter(sale => sale.salesExecutiveId === userId);
-
-    const summary: SalesSummary = {
-      totalSales: userSales
-        .filter(s => s.status === 'completed')
-        .reduce((sum, sale) => sum + sale.amount, 0),
-      totalCommission: userSales
-        .filter(s => s.status === 'completed')
-        .reduce((sum, sale) => sum + sale.commission, 0),
-      completedCount: userSales.filter(s => s.status === 'completed').length,
-      pendingCount: userSales.filter(s => s.status === 'pending').length,
-      cancelledCount: userSales.filter(s => s.status === 'cancelled').length
-    };
-
-    return of(summary).pipe(delay(DATA_CONFIG.mockDataDelay || 300));
-  }
-
-  private getMockAllSales(): Observable<SalesRecord[]> {
-    return of(MOCK_DATA.salesRecords).pipe(delay(DATA_CONFIG.mockDataDelay || 300));
-  }
-
-  private getMockUsers(): Observable<User[]> {
-    return of(MOCK_DATA.users).pipe(delay(DATA_CONFIG.mockDataDelay || 300));
-  }
 }
+

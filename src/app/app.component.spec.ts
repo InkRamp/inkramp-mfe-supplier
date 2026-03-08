@@ -22,10 +22,11 @@ describe('AppComponent', () => {
     expect(app.title).toEqual('mfe-MY_SALES');
   });
 
-  it('should render title', () => {
+  it('should render sales history component', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.app-title')?.textContent).toContain('My Sales');
+    expect(compiled.querySelector('app-sales-history')).toBeTruthy();
   });
 });
+
