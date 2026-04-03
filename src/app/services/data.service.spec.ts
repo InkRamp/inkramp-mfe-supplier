@@ -114,5 +114,80 @@ describe('DataService', () => {
     const req = httpMock.expectOne(`${API_BASE}/incentives/brand-xyz`);
     req.flush({ message: 'ok' });
   });
+
+  describe('getSales', () => {
+    it('should GET sales using org from decoded token', () => {
+      sessionStorage.setItem(STORAGE_KEYS.DECODED_TOKEN, JSON.stringify({
+        org_and_roles: { hdfc: ['sales-exec'] },
+        sub: 'auth0|sales1'
+      }));
+
+      const mockSales = [
+        { _id: 'sale-1', brandId: 'hdfc', owner: 'auth0|sales1', saleValue: 100000, status: 'OPEN', stage: 'LEAD' }
+      ];
+
+      service.getSales().subscribe(records => {
+        expect(records.length).toBe(1);
+        expect(records[0]._id).toBe('sale-1');
+        expect(records[0].saleValue).toBe(100000);
+      });
+
+      const req = httpMock.expectOne(`${API_BASE}/sales/hdfc`);
+      expect(req.request.method).toBe('GET');
+      req.flush({ data: { sales: mockSales } });
+    });
+
+    it('should pass status and stage filters as query params', () => {
+      sessionStorage.setItem(STORAGE_KEYS.DECODED_TOKEN, JSON.stringify({ org_and_roles: { hdfc: ['admin'] } }));
+
+      service.getSales({ status: 'COMPLETE', stage: 'CLOSED' }).subscribe();
+
+      const req = httpMock.expectOne(r => r.url === `${API_BASE}/sales/hdfc`);
+      expect(req.request.params.get('status')).toBe('COMPLETE');
+      expect(req.request.params.get('stage')).toBe('CLOSED');
+      req.flush({ data: [] });
+    });
+
+    it('should handle flat array response', () => {
+      sessionStorage.setItem(STORAGE_KEYS.DECODED_TOKEN, JSON.stringify({ org_and_roles: { 'brand-a': ['user'] } }));
+
+      const mockSales = [{ _id: 'sale-2', saleValue: 50000 }];
+      service.getSales().subscribe(records => {
+        expect(records.length).toBe(1);
+        expect(records[0]._id).toBe('sale-2');
+      });
+
+      const req = httpMock.expectOne(`${API_BASE}/sales/brand-a`);
+      req.flush(mockSales);
+    });
+
+    it('should handle SuccessResponse envelope for sales', () => {
+      sessionStorage.setItem(STORAGE_KEYS.DECODED_TOKEN, JSON.stringify({ org_and_roles: { hdfc: ['admin'] } }));
+
+      const mockSales = [{ _id: 'sale-3', saleValue: 75000, status: 'IN_PROGRESS' }];
+      service.getSales().subscribe(records => {
+        expect(records.length).toBe(1);
+        expect(records[0].status).toBe('IN_PROGRESS');
+      });
+
+      const req = httpMock.expectOne(`${API_BASE}/sales/hdfc`);
+      req.flush({ success: true, data: mockSales });
+    });
+
+    it('should return empty array for unexpected sales response shape', () => {
+      sessionStorage.setItem(STORAGE_KEYS.DECODED_TOKEN, JSON.stringify({ org_and_roles: { 'brand-z': ['user'] } }));
+
+      service.getSales().subscribe(records => {
+        expect(records).toEqual([]);
+      });
+
+      const req = httpMock.expectOne(`${API_BASE}/sales/brand-z`);
+      req.flush({ message: 'ok' });
+    });
+
+    it('should throw if decoded token is absent when calling getSales', () => {
+      expect(() => service.getSales()).toThrowError("Organization not found in sessionStorage. Expected 'org' or 'brandId' key.");
+    });
+  });
 });
 

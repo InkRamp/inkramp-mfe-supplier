@@ -29,3 +29,33 @@ export interface PaginatedPayouts {
   limit: number;
   totalPages: number;
 }
+
+export type SaleStatus = 'OPEN' | 'IN_PROGRESS' | 'COMPLETE' | 'DECLINED';
+export type SaleStage = 'LEAD' | 'QUALIFIED' | 'PROPOSAL' | 'NEGOTIATION' | 'CLOSED';
+
+export interface SaleRecord {
+  _id: string;
+  brandId?: string;
+  owner?: string;
+  coOwners?: string[];
+  status?: SaleStatus;
+  stage?: SaleStage;
+  saleValue?: number;
+  currency?: string;
+  quantity?: number;
+  saleData?: Record<string, unknown>;
+  openedDate?: string;
+  expectedCloseDate?: string;
+  closedDate?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface SaleFilters {
+  owner?: string;
+  coOwner?: string;
+  status?: string;
+  stage?: string;
+  startDate?: string;
+  endDate?: string;
+}
