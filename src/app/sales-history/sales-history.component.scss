@@ -1,266 +1,586 @@
 @import '../../styles/tokens';
 @import '../../styles/mixins';
 
-.sales-history-container {
+// ── Utilities ────────────────────────────────────────────────────────────────
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.truncated {
+  @include truncate-text;
+  display: block;
+}
+
+// ── Shared button styles ─────────────────────────────────────────────────────
+.btn {
+  @include button-base;
+
+  &.btn-primary {
+    @include button-primary;
+  }
+
+  &.btn-ghost {
+    background: transparent;
+    border: 1px solid $gray-300;
+    color: $gray-700;
+
+    &:hover:not(:disabled) {
+      background: $gray-100;
+      border-color: $gray-400;
+    }
+  }
+}
+
+// ── Container ────────────────────────────────────────────────────────────────
+.incentives-container {
   padding: $spacing-xl;
   max-width: 1400px;
   margin: 0 auto;
+}
 
-  .header {
-    margin-bottom: $spacing-xl;
+// ── Page Header ──────────────────────────────────────────────────────────────
+.page-header {
+  @include flex-between;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+  margin-bottom: $spacing-xl;
 
-    h1 {
-      color: $gray-900;
-      margin-bottom: $spacing-sm;
-    }
-
-    .subtitle {
-      color: $gray-600;
-      font-size: $font-size-base;
-    }
+  h1 {
+    color: $gray-900;
+    margin: 0 0 $spacing-xs;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
   }
 
-  .user-selector {
-    @include card;
-    margin-bottom: $spacing-xl;
-    display: flex;
-    align-items: center;
-    gap: $spacing-md;
-
-    label {
-      font-weight: $font-weight-medium;
-      color: $gray-700;
-      white-space: nowrap;
-    }
-
-    select {
-      flex: 1;
-      padding: $spacing-sm $spacing-md;
-      border: 1px solid $gray-300;
-      border-radius: $border-radius-md;
-      font-size: $font-size-base;
-      background-color: $white;
-      cursor: pointer;
-      transition: $transition-base;
-
-      &:hover {
-        border-color: $primary-color;
-      }
-
-      &:focus {
-        outline: none;
-        border-color: $primary-color;
-        box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
-      }
-    }
-  }
-
-  .summary-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: $spacing-lg;
-    margin-bottom: $spacing-xl;
-
-    .summary-card {
-      @include card;
-      display: flex;
-      align-items: center;
-      gap: $spacing-md;
-      transition: $transition-base;
-
-      &:hover {
-        box-shadow: $shadow-lg;
-        transform: translateY(-2px);
-      }
-
-      .card-icon {
-        font-size: 2.5rem;
-        width: 60px;
-        height: 60px;
-        @include flex-center;
-        border-radius: $border-radius-lg;
-        flex-shrink: 0;
-
-        &.completed {
-          background-color: rgba($success-color, 0.1);
-        }
-
-        &.commission {
-          background-color: rgba($primary-color, 0.1);
-        }
-
-        &.info {
-          background-color: rgba($info-color, 0.1);
-        }
-
-        &.warning {
-          background-color: rgba($warning-color, 0.1);
-        }
-
-        &.danger {
-          background-color: rgba($danger-color, 0.1);
-        }
-      }
-
-      .card-content {
-        flex: 1;
-
-        .card-label {
-          font-size: $font-size-sm;
-          color: $gray-600;
-          margin-bottom: $spacing-xs;
-        }
-
-        .card-value {
-          font-size: $font-size-xl;
-          font-weight: $font-weight-bold;
-          color: $gray-900;
-        }
-      }
-    }
-  }
-
-  .loading {
-    @include flex-center;
-    flex-direction: column;
-    padding: $spacing-2xl;
+  .subtitle {
     color: $gray-600;
+    font-size: $font-size-sm;
+    margin: 0;
+  }
+}
 
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid $gray-200;
-      border-top-color: $primary-color;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: $spacing-md;
-    }
+.stats-strip {
+  display: flex;
+  gap: $spacing-lg;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .stat-value {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $primary-color;
+    line-height: 1;
   }
 
-  .sales-table-container {
-    @include card;
-    overflow-x: auto;
-    @include scrollbar;
+  .stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $gray-500;
+  }
+}
 
-    .sales-table {
-      width: 100%;
-      border-collapse: collapse;
+// ── Filter Section ───────────────────────────────────────────────────────────
+.filter-section {
+  @include card;
+  margin-bottom: $spacing-xl;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
 
-      thead {
-        background-color: $gray-100;
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  background: $gray-100;
+  border: 1px solid $gray-300;
+  border-radius: $border-radius-md;
+  padding: 0 $spacing-sm;
+  transition: $transition-base;
 
-        tr {
-          border-bottom: 2px solid $gray-300;
-        }
-
-        th {
-          padding: $spacing-md;
-          text-align: left;
-          font-weight: $font-weight-semibold;
-          color: $gray-700;
-          font-size: $font-size-sm;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-        }
-      }
-
-      tbody {
-        tr {
-          border-bottom: 1px solid $gray-200;
-          transition: $transition-fast;
-
-          &:hover {
-            background-color: $gray-100;
-          }
-
-          &:last-child {
-            border-bottom: none;
-          }
-        }
-
-        td {
-          padding: $spacing-md;
-          color: $gray-800;
-          font-size: $font-size-sm;
-
-          &.amount,
-          &.commission {
-            font-weight: $font-weight-medium;
-            font-family: 'Courier New', monospace;
-          }
-
-          &.amount {
-            color: $gray-900;
-          }
-
-          &.commission {
-            color: $success-color;
-          }
-
-          .status-badge {
-            display: inline-block;
-            padding: $spacing-xs $spacing-sm;
-            border-radius: $border-radius-xl;
-            font-size: 0.75rem;
-            font-weight: $font-weight-medium;
-            text-transform: capitalize;
-
-            &.status-completed {
-              background-color: rgba($success-color, 0.1);
-              color: darken($success-color, 10%);
-            }
-
-            &.status-pending {
-              background-color: rgba($warning-color, 0.1);
-              color: darken($warning-color, 20%);
-            }
-
-            &.status-cancelled {
-              background-color: rgba($danger-color, 0.1);
-              color: darken($danger-color, 10%);
-            }
-          }
-        }
-      }
-    }
+  &:focus-within {
+    border-color: $primary-color;
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.12);
+    background: $white;
   }
 
-  .empty-state {
-    @include card;
+  .search-icon {
+    font-size: 0.9rem;
+    color: $gray-500;
+    flex-shrink: 0;
+  }
+
+  .search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: $spacing-sm 0;
+    font-size: $font-size-base;
+    color: $gray-900;
+    outline: none;
+    min-width: 0;
+
+    &::placeholder { color: $gray-400; }
+    &::-webkit-search-cancel-button { display: none; }
+  }
+
+  .clear-search-btn {
+    @include button-base;
+    background: transparent;
+    color: $gray-500;
+    padding: $spacing-xs;
+    font-size: 0.75rem;
+    line-height: 1;
+
+    &:hover { color: $gray-900; }
+  }
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: $spacing-md;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  min-width: 140px;
+
+  .filter-label {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $gray-700;
+  }
+
+  .filter-select {
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid $gray-300;
+    border-radius: $border-radius-md;
+    font-size: $font-size-sm;
+    background: $white;
+    color: $gray-900;
+    cursor: pointer;
+    transition: $transition-base;
+
+    &:hover { border-color: $gray-400; }
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba($primary-color, 0.12);
+    }
+  }
+}
+
+.clear-all-btn {
+  align-self: flex-end;
+  font-size: $font-size-sm;
+  padding: $spacing-sm $spacing-md;
+}
+
+// Active filter chips
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-sm;
+  padding-top: $spacing-xs;
+  border-top: 1px solid $gray-200;
+
+  .filters-prefix {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $gray-600;
+  }
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  background: rgba($primary-color, 0.08);
+  border: 1px solid rgba($primary-color, 0.25);
+  border-radius: $border-radius-xl;
+  padding: $spacing-xs $spacing-sm;
+  font-size: 0.8rem;
+
+  .chip-label {
+    font-weight: $font-weight-semibold;
+    color: $primary-color;
+  }
+
+  .chip-value {
+    color: $gray-800;
+    max-width: 180px;
+    @include truncate-text;
+  }
+
+  .chip-remove {
+    @include button-base;
+    background: none;
+    border: none;
+    color: $gray-500;
+    padding: 0;
+    font-size: 0.7rem;
+    line-height: 1;
+    width: 16px;
+    height: 16px;
     @include flex-center;
-    flex-direction: column;
-    padding: $spacing-2xl;
-    text-align: center;
+    border-radius: 50%;
 
-    .empty-icon {
-      font-size: 4rem;
-      margin-bottom: $spacing-lg;
-      opacity: 0.5;
+    &:hover {
+      background: rgba($danger-color, 0.1);
+      color: $danger-color;
     }
+  }
+}
 
-    h2 {
-      color: $gray-700;
-      margin-bottom: $spacing-sm;
-    }
+// ── Loading ──────────────────────────────────────────────────────────────────
+.loading-state {
+  @include flex-center;
+  flex-direction: column;
+  gap: $spacing-md;
+  padding: $spacing-2xl;
+  color: $gray-600;
 
-    p {
-      color: $gray-600;
-    }
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid $gray-200;
+    border-top-color: $primary-color;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
   }
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
+  to { transform: rotate(360deg); }
+}
+
+// ── Error State ──────────────────────────────────────────────────────────────
+.error-state {
+  @include card;
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-md;
+  margin-bottom: $spacing-xl;
+  border-left: 4px solid $danger-color;
+  background: rgba($danger-color, 0.04);
+
+  .error-icon { font-size: 2rem; flex-shrink: 0; }
+
+  .error-body {
+    h2 { color: $danger-color; margin: 0 0 $spacing-xs; font-size: $font-size-lg; }
+    p  { color: $gray-700; margin: 0 0 $spacing-md; font-size: $font-size-sm; }
   }
 }
 
-@include responsive(md) {
-  .sales-history-container {
-    padding: $spacing-md;
+// ── Table Wrapper ────────────────────────────────────────────────────────────
+.table-wrapper {
+  @include card;
+  padding: 0;
+  overflow: hidden;
+}
 
-    .summary-cards {
-      grid-template-columns: 1fr;
+.table-scroll {
+  overflow-x: auto;
+  @include scrollbar;
+}
+
+// ── Table ────────────────────────────────────────────────────────────────────
+.incentives-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+
+  .table-caption {
+    text-align: left;
+    padding: $spacing-md $spacing-lg;
+    font-size: $font-size-sm;
+    color: $gray-600;
+    background: $gray-100;
+    border-bottom: 1px solid $gray-200;
+    caption-side: top;
+  }
+
+  thead {
+    background: $gray-100;
+    border-bottom: 2px solid $gray-300;
+
+    th {
+      padding: $spacing-md;
+      text-align: left;
+      font-weight: $font-weight-semibold;
+      color: $gray-700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      vertical-align: bottom;
+    }
+
+    // Sortable column header button
+    .sort-btn {
+      @include button-base;
+      background: none;
+      border: none;
+      color: inherit;
+      font: inherit;
+      font-size: 0.75rem;
+      font-weight: $font-weight-semibold;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: $spacing-xs;
+      cursor: pointer;
+      white-space: nowrap;
+
+      &:hover { color: $primary-color; }
+
+      &:focus-visible {
+        outline: 2px solid $primary-color;
+        outline-offset: 2px;
+        border-radius: $border-radius-sm;
+      }
+
+      .sort-icon {
+        font-size: 0.65rem;
+        color: $gray-400;
+        transition: color $transition-fast;
+      }
+
+      &:hover .sort-icon { color: $primary-color; }
     }
   }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid $gray-200;
+      transition: background-color $transition-fast;
+
+      &:last-child { border-bottom: none; }
+      &:hover { background: rgba($primary-color, 0.03); }
+    }
+
+    td {
+      padding: $spacing-md;
+      color: $gray-800;
+      vertical-align: middle;
+    }
+  }
+
+  // Column widths
+  .col-num    { width: 3rem; text-align: center; color: $gray-400; }
+  .col-id     { max-width: 10rem; }
+  .col-brand  { width: 7rem; }
+  .col-user   { max-width: 12rem; }
+  .col-rule   { max-width: 12rem; }
+  .col-amount { width: 9rem; text-align: right; font-family: 'Courier New', monospace; font-weight: $font-weight-medium; }
+  .col-status { width: 8rem; text-align: center; }
+  .col-date   { width: 9rem; white-space: nowrap; }
 }
+
+// ── Status Badges ────────────────────────────────────────────────────────────
+.status-badge {
+  display: inline-block;
+  padding: 2px $spacing-sm;
+  border-radius: $border-radius-xl;
+  font-size: 0.7rem;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  &.status-paid {
+    background: rgba($success-color, 0.12);
+    color: darken($success-color, 12%);
+  }
+
+  &.status-approved {
+    background: rgba($info-color, 0.12);
+    color: darken($info-color, 12%);
+  }
+
+  &.status-pending {
+    background: rgba($warning-color, 0.15);
+    color: darken($warning-color, 28%);
+  }
+
+  &.status-cancelled {
+    background: rgba($danger-color, 0.1);
+    color: darken($danger-color, 10%);
+  }
+
+  &.status-default {
+    background: $gray-200;
+    color: $gray-600;
+  }
+}
+
+// ── Empty cell ───────────────────────────────────────────────────────────────
+.empty-cell {
+  padding: $spacing-2xl !important;
+  text-align: center;
+}
+
+.inline-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-sm;
+  color: $gray-500;
+  font-size: $font-size-sm;
+}
+
+// ── Pagination ───────────────────────────────────────────────────────────────
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+  padding: $spacing-md $spacing-lg;
+  border-top: 1px solid $gray-200;
+  background: $gray-100;
+}
+
+.page-btn {
+  @include button-base;
+  background: $white;
+  border: 1px solid $gray-300;
+  color: $gray-700;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 $spacing-sm;
+  font-size: $font-size-sm;
+  @include flex-center;
+  border-radius: $border-radius-md;
+  transition: $transition-fast;
+
+  &:hover:not(:disabled) {
+    background: $primary-color;
+    color: $white;
+    border-color: $primary-color;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $primary-color;
+    outline-offset: 2px;
+  }
+
+  &.active {
+    background: $primary-color;
+    color: $white;
+    border-color: $primary-color;
+    font-weight: $font-weight-semibold;
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}
+
+.page-info {
+  font-size: $font-size-sm;
+  color: $gray-600;
+  margin-left: $spacing-sm;
+  white-space: nowrap;
+}
+
+// ── Responsive ───────────────────────────────────────────────────────────────
+@include responsive(md) {
+  .incentives-container {
+    padding: $spacing-md;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .stats-strip {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .filters-row {
+    flex-direction: column;
+    align-items: stretch;
+
+    .filter-group { min-width: 0; }
+    .clear-all-btn { align-self: flex-start; }
+  }
+}
+
+@include responsive(sm) {
+  .incentives-container { padding: $spacing-sm; }
+
+  // Stack table cells on mobile with data-label pseudo-labels
+  .incentives-table {
+    thead { display: none; }
+
+    tbody {
+      tr {
+        display: block;
+        border: 1px solid $gray-200;
+        border-radius: $border-radius-md;
+        margin-bottom: $spacing-md;
+        padding: $spacing-sm;
+
+        &:hover { background: rgba($primary-color, 0.03); }
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: $spacing-xs $spacing-sm;
+        border-bottom: 1px solid $gray-100;
+        font-size: $font-size-sm;
+
+        &:last-child { border-bottom: none; }
+
+        &::before {
+          content: attr(data-label);
+          font-weight: $font-weight-semibold;
+          color: $gray-600;
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          flex-shrink: 0;
+          margin-right: $spacing-sm;
+        }
+
+        &.col-num { display: none; }
+      }
+    }
+
+    .col-amount { text-align: left; }
+    .col-status { text-align: left; }
+  }
+
+  .pagination {
+    gap: $spacing-xs;
+
+    .page-info { width: 100%; text-align: center; order: -1; }
+  }
+}
+
