@@ -210,7 +210,8 @@ export class SalesHistoryComponent implements OnInit, OnDestroy {
 
   getSortLabel(column: string): string {
     if (this.sortColumn !== column) return `Sort by ${column}, not sorted`;
-    return `Sorted by ${column}, ${this.sortDirection === 'asc' ? 'ascending' : 'descending'}. Click to sort descending.`;
+    const nextDir = this.sortDirection === 'asc' ? 'descending' : 'ascending';
+    return `Sorted by ${column}, ${this.sortDirection === 'asc' ? 'ascending' : 'descending'}. Click to sort ${nextDir}.`;
   }
 
   getSortIcon(column: string): string {
