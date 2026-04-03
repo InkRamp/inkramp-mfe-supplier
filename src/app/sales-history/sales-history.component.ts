@@ -99,7 +99,8 @@ export class SalesHistoryComponent implements OnInit, OnDestroy {
     const filters: PayoutFilters = {
       page: this.currentPage,
       limit: this.pageSize,
-      ...(this.filterStatus && { status: this.filterStatus })
+      ...(this.filterStatus && { status: this.filterStatus }),
+      ...(!this.roleService.isTeamLeadOrHigher() && this.currentUser?.id && { userId: this.currentUser.id })
     };
 
     try {
