@@ -1,72 +1,333 @@
-<div class="incentives-container">
-  <div class="header">
-    <h1>💰 Incentives Dashboard</h1>
-    <p class="subtitle" *ngIf="currentUser">
-      Logged in as: <strong>{{ currentUser.name || currentUser.email }}</strong>
-    </p>
-  </div>
+<div class="incentives-container" role="main" aria-labelledby="page-title">
 
-  <!-- Loading indicator -->
-  <div class="loading" *ngIf="isLoading">
-    <div class="spinner"></div>
-    <p>Loading incentives...</p>
-  </div>
-
-  <!-- Error state -->
-  <div class="error-state" *ngIf="errorMessage && !isLoading">
-    <div class="error-icon">⚠️</div>
-    <h2>Error Loading Incentives</h2>
-    <p>{{ errorMessage }}</p>
-    <button class="retry-button" (click)="loadIncentives()">Retry</button>
-  </div>
-
-  <!-- Incentives Table -->
-  <div class="table-container" *ngIf="!isLoading && !errorMessage && incentiveRecords.length > 0">
-    <div class="stats">
-      <span class="stat-badge">Total Records: {{ incentiveRecords.length }}</span>
+  <!-- ── Page Header ────────────────────────────────────────────────────── -->
+  <header class="page-header">
+    <div class="header-text">
+      <h1 id="page-title">💰 Incentives Dashboard</h1>
+      <p class="subtitle" *ngIf="currentUser">
+        Logged in as: <strong>{{ currentUser.name || currentUser.email }}</strong>
+      </p>
     </div>
-    <table class="incentives-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>ID</th>
-          <th>Brand</th>
-          <th>User ID</th>
-          <th>Rule</th>
-          <th>Amount</th>
-          <th>Status</th>
-          <th>Created</th>
-          <th>Updated</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let record of incentiveRecords; let i = index" class="table-row">
-          <td class="row-number">{{ i + 1 }}</td>
-          <td class="record-id">{{ record._id }}</td>
-          <td>{{ record.brandId || 'N/A' }}</td>
-          <td class="user-id">{{ record.userId || 'N/A' }}</td>
-          <td>{{ getRuleName(record.ruleId) }}</td>
-          <td class="amount">
-            <span *ngIf="record.amount != null">{{ formatCurrency(record.amount) }}</span>
-            <span *ngIf="record.amount == null">—</span>
-          </td>
-          <td>
-            <span class="status-badge" [ngClass]="getStatusClass(record.status)">
-              {{ record.status || 'N/A' }}
-            </span>
-          </td>
-          <td class="date">{{ formatDate(record.createdAt) }}</td>
-          <td class="date">{{ formatDate(record.updatedAt) }}</td>
-        </tr>
-      </tbody>
-    </table>
+
+    <div class="stats-strip" aria-label="Record summary">
+      <span class="stat-item">
+        <span class="stat-value">{{ totalRecords }}</span>
+        <span class="stat-label">Total</span>
+      </span>
+      <span class="stat-item" *ngIf="filteredRecords.length !== incentiveRecords.length">
+        <span class="stat-value">{{ filteredRecords.length }}</span>
+        <span class="stat-label">Filtered</span>
+      </span>
+    </div>
+  </header>
+
+  <!-- ── Search & Filters ───────────────────────────────────────────────── -->
+  <section class="filter-section" aria-label="Search and filter controls">
+
+    <!-- Search bar -->
+    <div class="search-bar">
+      <span class="search-icon" aria-hidden="true">🔍</span>
+      <label for="search-input" class="sr-only">Search records</label>
+      <input
+        id="search-input"
+        type="search"
+        class="search-input"
+        placeholder="Search by user, rule, status…"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchChange()"
+        aria-controls="records-table"
+        aria-describedby="search-hint"
+        autocomplete="off"
+      />
+      <button
+        *ngIf="searchTerm"
+        class="icon-btn clear-search-btn"
+        (click)="clearFilter('search')"
+        aria-label="Clear search"
+        type="button"
+      >✕</button>
+    </div>
+    <span id="search-hint" class="sr-only">Searches across user ID, rule name, and status</span>
+
+    <!-- Filter row -->
+    <div class="filters-row" role="group" aria-label="Filter options">
+      <div class="filter-group">
+        <label for="status-filter" class="filter-label">Status</label>
+        <select
+          id="status-filter"
+          class="filter-select"
+          [(ngModel)]="filterStatus"
+          (change)="onFilterChange()"
+          aria-label="Filter by payout status"
+        >
+          <option value="">All Statuses</option>
+          <option *ngFor="let s of STATUS_OPTIONS" [value]="s">{{ s }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="page-size-select" class="filter-label">Per page</label>
+        <select
+          id="page-size-select"
+          class="filter-select"
+          [(ngModel)]="pageSize"
+          (change)="onPageSizeChange()"
+          aria-label="Rows per page"
+        >
+          <option *ngFor="let size of PAGE_SIZES" [value]="size">{{ size }}</option>
+        </select>
+      </div>
+
+      <button
+        *ngIf="activeFilters.length > 0"
+        class="btn btn-ghost clear-all-btn"
+        (click)="clearAllFilters()"
+        type="button"
+        aria-label="Clear all active filters"
+      >Clear all</button>
+    </div>
+
+    <!-- Active filter chips -->
+    <div
+      *ngIf="activeFilters.length > 0"
+      class="active-filters"
+      role="list"
+      aria-label="Active filters"
+    >
+      <span class="filters-prefix" aria-hidden="true">Active:</span>
+      <span
+        *ngFor="let f of activeFilters"
+        class="filter-chip"
+        role="listitem"
+      >
+        <span class="chip-label">{{ f.label }}</span>
+        <span class="chip-value">{{ f.value }}</span>
+        <button
+          class="chip-remove"
+          (click)="clearFilter(f.key)"
+          [attr.aria-label]="'Remove ' + f.label + ' filter'"
+          type="button"
+        >✕</button>
+      </span>
+    </div>
+
+  </section>
+
+  <!-- ── Loading ────────────────────────────────────────────────────────── -->
+  <div
+    class="loading-state"
+    *ngIf="isLoading"
+    role="status"
+    aria-live="polite"
+    aria-label="Loading incentive records, please wait"
+  >
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Loading incentives…</p>
   </div>
 
-  <!-- Empty state -->
-  <div class="empty-state" *ngIf="!isLoading && !errorMessage && incentiveRecords.length === 0">
-    <div class="empty-icon">📭</div>
-    <h2>No Incentive Records Found</h2>
-    <p>There are no incentive records available at this time.</p>
+  <!-- ── Error ──────────────────────────────────────────────────────────── -->
+  <div
+    class="error-state"
+    *ngIf="errorMessage && !isLoading"
+    role="alert"
+    aria-live="assertive"
+  >
+    <span class="error-icon" aria-hidden="true">⚠️</span>
+    <div class="error-body">
+      <h2>Error Loading Incentives</h2>
+      <p>{{ errorMessage }}</p>
+      <button class="btn btn-primary" (click)="loadPayouts()" type="button">Retry</button>
+    </div>
   </div>
+
+  <!-- ── Table ──────────────────────────────────────────────────────────── -->
+  <div
+    class="table-wrapper"
+    *ngIf="!isLoading && !errorMessage"
+    [attr.aria-busy]="isLoading"
+  >
+    <div
+      class="table-scroll"
+      role="region"
+      aria-label="Incentive records table, scroll horizontally if needed"
+      tabindex="0"
+    >
+      <table
+        id="records-table"
+        class="incentives-table"
+        aria-labelledby="page-title"
+        aria-describedby="table-caption"
+        [attr.aria-rowcount]="totalRecords"
+      >
+        <caption id="table-caption" class="table-caption">
+          Incentive payout records.
+          <span *ngIf="totalRecords > 0" aria-live="polite">
+            Showing {{ tableRangeStart }}–{{ tableRangeEnd }} of {{ totalRecords }}
+            <ng-container *ngIf="activeFilters.length > 0"> (filtered)</ng-container>.
+          </span>
+        </caption>
+
+        <thead>
+          <tr>
+            <th scope="col" class="col-num" aria-label="Row number">#</th>
+
+            <th scope="col" class="col-id" [attr.aria-sort]="getAriaSort('_id')">
+              <button class="sort-btn" (click)="sortBy('_id')" type="button" [attr.aria-label]="getSortLabel('_id')">
+                ID <span class="sort-icon" aria-hidden="true">{{ getSortIcon('_id') }}</span>
+              </button>
+            </th>
+
+            <th scope="col" class="col-brand" [attr.aria-sort]="getAriaSort('brandId')">
+              <button class="sort-btn" (click)="sortBy('brandId')" type="button" [attr.aria-label]="getSortLabel('brandId')">
+                Brand <span class="sort-icon" aria-hidden="true">{{ getSortIcon('brandId') }}</span>
+              </button>
+            </th>
+
+            <th scope="col" class="col-user" [attr.aria-sort]="getAriaSort('userId')">
+              <button class="sort-btn" (click)="sortBy('userId')" type="button" [attr.aria-label]="getSortLabel('userId')">
+                User <span class="sort-icon" aria-hidden="true">{{ getSortIcon('userId') }}</span>
+              </button>
+            </th>
+
+            <th scope="col" class="col-rule">Rule</th>
+
+            <th scope="col" class="col-amount" [attr.aria-sort]="getAriaSort('amount')">
+              <button class="sort-btn" (click)="sortBy('amount')" type="button" [attr.aria-label]="getSortLabel('amount')">
+                Amount <span class="sort-icon" aria-hidden="true">{{ getSortIcon('amount') }}</span>
+              </button>
+            </th>
+
+            <th scope="col" class="col-status" [attr.aria-sort]="getAriaSort('status')">
+              <button class="sort-btn" (click)="sortBy('status')" type="button" [attr.aria-label]="getSortLabel('status')">
+                Status <span class="sort-icon" aria-hidden="true">{{ getSortIcon('status') }}</span>
+              </button>
+            </th>
+
+            <th scope="col" class="col-date" [attr.aria-sort]="getAriaSort('createdAt')">
+              <button class="sort-btn" (click)="sortBy('createdAt')" type="button" [attr.aria-label]="getSortLabel('createdAt')">
+                Created <span class="sort-icon" aria-hidden="true">{{ getSortIcon('createdAt') }}</span>
+              </button>
+            </th>
+
+            <th scope="col" class="col-date">Updated</th>
+          </tr>
+        </thead>
+
+        <tbody aria-live="polite" aria-relevant="additions removals">
+          <tr
+            *ngFor="let record of filteredRecords; let i = index; trackBy: trackById"
+            class="table-row"
+            [attr.aria-rowindex]="tableRangeStart + i + 1"
+          >
+            <td class="col-num" data-label="#">{{ tableRangeStart + i }}</td>
+
+            <td class="col-id" data-label="ID">
+              <span class="truncated" [title]="record._id">{{ record._id }}</span>
+            </td>
+
+            <td class="col-brand" data-label="Brand">{{ record.brandId || '—' }}</td>
+
+            <td class="col-user" data-label="User">
+              <span class="truncated" [title]="record.userId">{{ record.userId || '—' }}</span>
+            </td>
+
+            <td class="col-rule" data-label="Rule">{{ getRuleName(record.ruleId) }}</td>
+
+            <td class="col-amount amount" data-label="Amount">{{ formatCurrency(record.amount) }}</td>
+
+            <td class="col-status" data-label="Status">
+              <span
+                class="status-badge"
+                [ngClass]="getStatusClass(record.status)"
+                [attr.aria-label]="'Status: ' + (record.status || 'Unknown')"
+              >{{ record.status || '—' }}</span>
+            </td>
+
+            <td class="col-date" data-label="Created">
+              <time [attr.datetime]="record.createdAt">{{ formatDate(record.createdAt) }}</time>
+            </td>
+
+            <td class="col-date" data-label="Updated">
+              <time [attr.datetime]="record.updatedAt">{{ formatDate(record.updatedAt) }}</time>
+            </td>
+          </tr>
+
+          <!-- In-table empty state -->
+          <tr *ngIf="filteredRecords.length === 0">
+            <td colspan="9" class="empty-cell">
+              <div class="inline-empty" role="status">
+                <span aria-hidden="true">📭</span>
+                <span>
+                  No records found
+                  <ng-container *ngIf="activeFilters.length > 0"> matching your filters</ng-container>.
+                </span>
+                <button
+                  *ngIf="activeFilters.length > 0"
+                  class="btn btn-ghost"
+                  (click)="clearAllFilters()"
+                  type="button"
+                >Clear filters</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Pagination ──────────────────────────────────────────────────── -->
+    <nav
+      class="pagination"
+      *ngIf="totalPages > 1"
+      aria-label="Table pagination"
+      role="navigation"
+    >
+      <button
+        class="page-btn"
+        (click)="onPageChange(1)"
+        [disabled]="currentPage === 1"
+        aria-label="Go to first page"
+        type="button"
+      >«</button>
+
+      <button
+        class="page-btn"
+        (click)="onPageChange(currentPage - 1)"
+        [disabled]="currentPage === 1"
+        aria-label="Go to previous page"
+        type="button"
+      >‹</button>
+
+      <button
+        *ngFor="let page of pageNumbers"
+        class="page-btn"
+        [class.active]="page === currentPage"
+        (click)="onPageChange(page)"
+        [attr.aria-label]="'Page ' + page"
+        [attr.aria-current]="page === currentPage ? 'page' : null"
+        type="button"
+      >{{ page }}</button>
+
+      <button
+        class="page-btn"
+        (click)="onPageChange(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+        aria-label="Go to next page"
+        type="button"
+      >›</button>
+
+      <button
+        class="page-btn"
+        (click)="onPageChange(totalPages)"
+        [disabled]="currentPage === totalPages"
+        aria-label="Go to last page"
+        type="button"
+      >»</button>
+
+      <span class="page-info" aria-live="polite" aria-atomic="true">
+        Page {{ currentPage }} of {{ totalPages }}
+      </span>
+    </nav>
+  </div>
+
 </div>
 
