@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { APP_CONFIG, STORAGE_CONFIG, STORAGE_KEYS, getDecodedToken } from '@opensourcekd/ng-common-libs';
-import { IncentiveRecord, PayoutFilters, PaginatedPayouts } from '../models/incentive.model';
+import { IncentiveRecord, PayoutFilters, PaginatedPayouts, SaleRecord, SaleFilters } from '../models/incentive.model';
 
 const API_BASE = `${APP_CONFIG.apiUrl}/db`;
 
@@ -76,6 +76,42 @@ export class DataService {
         const totalPages = limit > 0 ? Math.ceil(total / limit) : 1;
 
         return { records, total, page, limit, totalPages };
+      })
+    );
+  }
+
+  /** Fetches sales from the API with optional server-side filtering. */
+  getSales(filters: SaleFilters = {}): Observable<SaleRecord[]> {
+    const orgOrBrand = this.getBrandId();
+    let params = new HttpParams();
+
+    if (filters.owner) params = params.set('owner', filters.owner);
+    if (filters.coOwner) params = params.set('coOwner', filters.coOwner);
+    if (filters.status) params = params.set('status', filters.status);
+    if (filters.stage) params = params.set('stage', filters.stage);
+    if (filters.startDate) params = params.set('startDate', filters.startDate);
+    if (filters.endDate) params = params.set('endDate', filters.endDate);
+
+    return this.http.get<any>(`${API_BASE}/sales/${orgOrBrand}`, { params }).pipe(
+      map(response => {
+        let parsed = response;
+        if (typeof response?.body === 'string') {
+          try { parsed = JSON.parse(response.body); } catch { parsed = response; }
+        }
+
+        // Unwrap SuccessResponse envelope
+        const payload = parsed?.data ?? parsed;
+
+        // Handle { sales: [...] } shape or flat array
+        const records: SaleRecord[] = Array.isArray(payload?.sales)
+          ? payload.sales
+          : Array.isArray(payload?.records)
+            ? payload.records
+            : Array.isArray(payload)
+              ? payload
+              : [];
+
+        return records;
       })
     );
   }

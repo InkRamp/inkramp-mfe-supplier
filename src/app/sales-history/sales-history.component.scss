@@ -46,6 +46,48 @@
   margin: 0 auto;
 }
 
+// ── Tab Navigation ───────────────────────────────────────────────────────────
+.tab-nav {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid $gray-200;
+  margin-bottom: $spacing-xl;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  padding: $spacing-sm $spacing-lg;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $gray-600;
+  cursor: pointer;
+  transition: $transition-base;
+
+  &:hover:not(.active) {
+    color: $gray-900;
+    border-bottom-color: $gray-300;
+    background: $gray-200;
+  }
+
+  &.active {
+    color: $primary-color;
+    border-bottom-color: $primary-color;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $primary-color;
+    outline-offset: 2px;
+  }
+}
+
+// ── col-stage ────────────────────────────────────────────────────────────────
+.col-stage {
+  min-width: 120px;
+}
+
 // ── Page Header ──────────────────────────────────────────────────────────────
 .page-header {
   @include flex-between;
