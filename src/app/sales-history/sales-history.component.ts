@@ -61,8 +61,11 @@ export class SalesHistoryComponent implements OnInit, OnDestroy {
   readonly PAGE_SIZES = [10, 20, 50, 100];
   readonly Math = Math;
 
-  /** @deprecated Use PAYOUT_STATUS_OPTIONS */
+  /** @deprecated since v2.0 — use PAYOUT_STATUS_OPTIONS instead. Will be removed in v3.0. */
   get STATUS_OPTIONS() { return this.PAYOUT_STATUS_OPTIONS; }
+
+  readonly SALES_COLUMN_COUNT = 9;
+  readonly PAYOUTS_COLUMN_COUNT = 9;
 
   private readonly destroy$ = new Subject<void>();
   private readonly searchSubject$ = new Subject<string>();

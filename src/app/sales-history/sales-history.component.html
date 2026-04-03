@@ -283,7 +283,7 @@
             </tr>
 
             <tr *ngIf="filteredSales.length === 0">
-              <td colspan="9" class="empty-cell">
+              <td [attr.colspan]="SALES_COLUMN_COUNT" class="empty-cell">
                 <div class="inline-empty" role="status">
                   <span aria-hidden="true">📭</span>
                   <span>
@@ -545,7 +545,7 @@
             </tr>
 
             <tr *ngIf="filteredRecords.length === 0">
-              <td colspan="9" class="empty-cell">
+              <td [attr.colspan]="PAYOUTS_COLUMN_COUNT" class="empty-cell">
                 <div class="inline-empty" role="status">
                   <span aria-hidden="true">📭</span>
                   <span>
