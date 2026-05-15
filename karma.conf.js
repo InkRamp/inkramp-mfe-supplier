@@ -25,7 +25,7 @@ module.exports = function (config) {
       suppressAll: true // removes the duplicated traces
     },
     coverageReporter: {
-      dir: require('path').join(__dirname, './coverage/mfe-MY_SALES'),
+      dir: require('path').join(__dirname, './coverage/inkramp-mfe-supplier'),
       subdir: '.',
       reporters: [
         { type: 'html' },

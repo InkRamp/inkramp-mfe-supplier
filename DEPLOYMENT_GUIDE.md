@@ -1,4 +1,4 @@
-# Deployment Guide - mfe-MY_SALES
+# Deployment Guide - inkramp-mfe-supplier
 
 ## Build & Deployment Instructions
 
@@ -30,7 +30,7 @@ npm start
 ### 4. Build for Production
 ```bash
 npm run build
-# Output: dist/mfe-MY_SALES/
+# Output: dist/inkramp-mfe-supplier/
 ```
 
 ---
@@ -42,7 +42,7 @@ The repository should have a GitHub Actions workflow for automated deployment. H
 ### .github/workflows/deploy.yml
 
 ```yaml
-name: Deploy mfe-MY_SALES
+name: Deploy inkramp-mfe-supplier
 
 on:
   push:
@@ -80,10 +80,10 @@ jobs:
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: main  # Target branch in all-mfe-builds repo
-        folder: ./dist/mfe-MY_SALES
-        repository-name: OpensourceKD/all-mfe-builds
+        folder: ./dist/inkramp-mfe-supplier
+        repository-name: InkRamp/all-mfe-builds
         token: ${{ secrets.PAT_TOKEN }}
-        target-folder: mfe-MY_SALES
+        target-folder: inkramp-mfe-supplier
         clean: false
         single-commit: false  # Keep history for multiple MFEs
 ```
@@ -103,12 +103,12 @@ Add these secrets in GitHub repository settings:
 
 ### GitHub Pages (Recommended for Demo)
 
-**URL Structure**: `https://opensourcekd.github.io/all-mfe-builds/mfe-MY_SALES/`
+**URL Structure**: `https://opensourcekd.github.io/all-mfe-builds/inkramp-mfe-supplier/`
 
 **Folder Structure in all-mfe-builds repo**:
 ```
 all-mfe-builds/
-├── mfe-MY_SALES/
+├── inkramp-mfe-supplier/
 │   ├── index.html
 │   ├── remoteEntry.js
 │   ├── main.*.js
@@ -125,13 +125,13 @@ For production environments, deploy to a CDN or web server:
 
 1. **AWS S3 + CloudFront**
    ```bash
-   aws s3 sync dist/mfe-MY_SALES/ s3://your-bucket/mfe-MY_SALES/
-   aws cloudfront create-invalidation --distribution-id YOUR_DIST_ID --paths "/mfe-MY_SALES/*"
+   aws s3 sync dist/inkramp-mfe-supplier/ s3://your-bucket/inkramp-mfe-supplier/
+   aws cloudfront create-invalidation --distribution-id YOUR_DIST_ID --paths "/inkramp-mfe-supplier/*"
    ```
 
 2. **Azure Static Web Apps**
    ```bash
-   az storage blob upload-batch -s dist/mfe-MY_SALES -d '$web/mfe-MY_SALES' --account-name youraccount
+   az storage blob upload-batch -s dist/inkramp-mfe-supplier -d '$web/inkramp-mfe-supplier' --account-name youraccount
    ```
 
 3. **Nginx Configuration**
@@ -140,9 +140,9 @@ For production environments, deploy to a CDN or web server:
        listen 80;
        server_name your-domain.com;
        
-       location /mfe-MY_SALES/ {
-           alias /var/www/mfe-MY_SALES/;
-           try_files $uri $uri/ /mfe-MY_SALES/index.html;
+       location /inkramp-mfe-supplier/ {
+           alias /var/www/inkramp-mfe-supplier/;
+           try_files $uri $uri/ /inkramp-mfe-supplier/index.html;
        }
    }
    ```
@@ -162,7 +162,7 @@ const routes: Routes = [
     path: 'sales',
     loadChildren: () => loadRemoteModule({
       type: 'module',
-      remoteEntry: 'https://opensourcekd.github.io/all-mfe-builds/mfe-MY_SALES/remoteEntry.js',
+      remoteEntry: 'https://opensourcekd.github.io/all-mfe-builds/inkramp-mfe-supplier/remoteEntry.js',
       exposedModule: './Component'
     }).then(m => m.AppComponent)
   }
@@ -174,8 +174,8 @@ const routes: Routes = [
 ```typescript
 // Shell's MFE registry
 const mfeRegistry = {
-  'mfe-MY_SALES': {
-    remoteEntry: 'https://opensourcekd.github.io/all-mfe-builds/mfe-MY_SALES/remoteEntry.js',
+  'inkramp-mfe-supplier': {
+    remoteEntry: 'https://opensourcekd.github.io/all-mfe-builds/inkramp-mfe-supplier/remoteEntry.js',
     exposedModule: './Component',
     displayName: 'My Sales',
     icon: '💼',
@@ -213,7 +213,7 @@ export const environment = {
 // environments/environment.prod.ts
 export const environment = {
   production: true,
-  mfeBaseUrl: 'https://opensourcekd.github.io/all-mfe-builds/mfe-MY_SALES',
+  mfeBaseUrl: 'https://opensourcekd.github.io/all-mfe-builds/inkramp-mfe-supplier',
   apiUrl: 'https://api.yourdomain.com'
 };
 ```
@@ -245,7 +245,7 @@ git push origin --tags
 
 For production, consider versioned deployments:
 ```
-mfe-MY_SALES/
+inkramp-mfe-supplier/
 ├── v1.0.0/
 │   └── remoteEntry.js
 ├── v1.1.0/
@@ -283,7 +283,7 @@ Switch traffic after validation:
 ```javascript
 // Shell's MFE config
 const mfeVersion = isGreenActive ? 'v1.1.0' : 'v1.0.0';
-const remoteEntry = `https://cdn.example.com/mfe-MY_SALES/${mfeVersion}/remoteEntry.js`;
+const remoteEntry = `https://cdn.example.com/inkramp-mfe-supplier/${mfeVersion}/remoteEntry.js`;
 ```
 
 ---
@@ -305,7 +305,7 @@ const remoteEntry = `https://cdn.example.com/mfe-MY_SALES/${mfeVersion}/remoteEn
 npm install -D webpack-bundle-analyzer
 
 # Add script to package.json
-"analyze": "ng build --stats-json && webpack-bundle-analyzer dist/mfe-MY_SALES/stats.json"
+"analyze": "ng build --stats-json && webpack-bundle-analyzer dist/inkramp-mfe-supplier/stats.json"
 
 # Run analysis
 npm run analyze

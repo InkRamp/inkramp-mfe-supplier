@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "mfe-MY_SALES": {
+    "inkramp-mfe-supplier": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "ngx-build-plus:browser",
           "options": {
-            "outputPath": "dist/mfe-MY_SALES",
+            "outputPath": "dist/inkramp-mfe-supplier",
             "index": "src/index.html",
             "polyfills": [],
             "tsConfig": "tsconfig.app.json",
@@ -63,11 +63,11 @@
           "builder": "ngx-build-plus:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "mfe-MY_SALES:build:production",
+              "buildTarget": "inkramp-mfe-supplier:build:production",
               "extraWebpackConfig": "webpack.prod.config.js"
             },
             "development": {
-              "buildTarget": "mfe-MY_SALES:build:development"
+              "buildTarget": "inkramp-mfe-supplier:build:development"
             }
           },
           "defaultConfiguration": "development",
@@ -80,7 +80,7 @@
         "extract-i18n": {
           "builder": "ngx-build-plus:extract-i18n",
           "options": {
-            "buildTarget": "mfe-MY_SALES:build",
+            "buildTarget": "inkramp-mfe-supplier:build",
             "extraWebpackConfig": "webpack.config.js"
           }
         },

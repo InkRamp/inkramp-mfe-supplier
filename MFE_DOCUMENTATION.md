@@ -1,8 +1,8 @@
-# mfe-MY_SALES - Sales History Micro Frontend
+# inkramp-mfe-supplier - Sales History Micro Frontend
 
 ## Overview
 
-**mfe-MY_SALES** is a micro-frontend application designed to display sales history and performance metrics for sales executives. This MFE is part of a larger sales incentive management system and works in both standalone and federated modes.
+**inkramp-mfe-supplier** is a micro-frontend application designed to display sales history and performance metrics for sales executives. This MFE is part of a larger sales incentive management system and works in both standalone and federated modes.
 
 ## Features
 
@@ -34,7 +34,7 @@
 ### Project Structure
 
 ```
-mfe-MY_SALES/
+inkramp-mfe-supplier/
 ├── src/
 │   ├── app/
 │   │   ├── sales-history/          # Sales history component
@@ -288,9 +288,9 @@ The MFE is deployed to GitHub Pages as part of the CI/CD pipeline:
   uses: JamesIves/github-pages-deploy-action@v4
   with:
     branch: main
-    folder: ./dist/mfe-MY_SALES
-    repository-name: OpensourceKD/all-mfe-builds
-    target-folder: mfe-MY_SALES
+    folder: ./dist/inkramp-mfe-supplier
+    repository-name: InkRamp/all-mfe-builds
+    target-folder: inkramp-mfe-supplier
     clean: false
 ```
 

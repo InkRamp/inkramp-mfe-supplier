@@ -19,7 +19,7 @@ interface UserInfo {
   providedIn: 'root'
 })
 export class AuthService {
-  id = 'auth of mfe-MY_SALES';
+  id = 'auth of inkramp-mfe-supplier';
 
   private readonly ISSUER_BASE_URL = 'https://topfix-wrczmn.us1.zitadel.cloud';
   private readonly CLIENT_ID = '336777344075263315';
