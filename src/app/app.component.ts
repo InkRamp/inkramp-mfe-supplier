@@ -9,10 +9,4 @@ import { SalesHistoryComponent } from './sales-history/sales-history.component';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
-  title = 'inkramp-mfe-supplier';
-  constructor() {
-    console.log('In inkramp-mfe-supplier constructor');
-  }
-}
-
+export class AppComponent {}

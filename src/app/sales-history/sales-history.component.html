@@ -1,625 +1,79 @@
-<div class="incentives-container" role="main" aria-labelledby="page-title">
-
-  <!-- ── Page Header ────────────────────────────────────────────────────── -->
-  <header class="page-header">
-    <div class="header-text">
-      <h1 id="page-title">📊 My Sales Dashboard</h1>
-      <p class="subtitle" *ngIf="currentUser">
-        Logged in as: <strong>{{ currentUser.name || currentUser.email }}</strong>
-      </p>
-    </div>
-
-    <div class="stats-strip" aria-label="Record summary">
-      <span class="stat-item" *ngIf="activeTab === 'sales'">
-        <span class="stat-value">{{ salesRecords.length }}</span>
-        <span class="stat-label">Sales</span>
-      </span>
-      <span class="stat-item" *ngIf="activeTab === 'payouts'">
-        <span class="stat-value">{{ totalRecords }}</span>
-        <span class="stat-label">Payouts</span>
-      </span>
-    </div>
+<div class="supplier-workspace">
+  <header>
+    <h1>Supplier Workspace</h1>
+    <p>Manage RFQs, quotes, and catalog items from the live platform APIs.</p>
   </header>
 
-  <!-- ── Tab Navigation ────────────────────────────────────────────────── -->
-  <nav class="tab-nav" role="tablist" aria-label="Dashboard sections">
-    <button
-      role="tab"
-      class="tab-btn"
-      [class.active]="activeTab === 'sales'"
-      [attr.aria-selected]="activeTab === 'sales'"
-      aria-controls="panel-sales"
-      id="tab-sales"
-      (click)="setActiveTab('sales')"
-      type="button"
-    >🧾 My Sales</button>
-
-    <button
-      role="tab"
-      class="tab-btn"
-      [class.active]="activeTab === 'payouts'"
-      [attr.aria-selected]="activeTab === 'payouts'"
-      aria-controls="panel-payouts"
-      id="tab-payouts"
-      (click)="setActiveTab('payouts')"
-      type="button"
-    >💰 My Payouts</button>
+  <nav class="tab-nav" aria-label="Supplier sections">
+    <button type="button" [class.active]="activeTab === 'rfqs'" (click)="setTab('rfqs')">Open RFQs</button>
+    <button type="button" [class.active]="activeTab === 'quotes'" (click)="setTab('quotes')">My Quotes</button>
+    <button type="button" [class.active]="activeTab === 'catalog'" (click)="setTab('catalog')">Catalog</button>
   </nav>
 
-  <!-- ═══════════════════════════════════════════════════════════════════════
-       SALES TAB
-  ════════════════════════════════════════════════════════════════════════ -->
-  <div
-    id="panel-sales"
-    role="tabpanel"
-    aria-labelledby="tab-sales"
-    [hidden]="activeTab !== 'sales'"
-  >
+  <div class="status" *ngIf="isLoading">Loading supplier data…</div>
+  <div class="status error" *ngIf="error">{{ error }}</div>
+  <div class="status success" *ngIf="success">{{ success }}</div>
 
-    <!-- ── Sales Filters ─────────────────────────────────────────────────── -->
-    <section class="filter-section" aria-label="Sales search and filter controls">
-
-      <div class="search-bar">
-        <span class="search-icon" aria-hidden="true">🔍</span>
-        <label for="sales-search-input" class="sr-only">Search sales</label>
-        <input
-          id="sales-search-input"
-          type="search"
-          class="search-input"
-          placeholder="Search by ID, owner, status, stage…"
-          [(ngModel)]="salesSearchTerm"
-          (ngModelChange)="onSalesSearchChange()"
-          autocomplete="off"
-        />
-        <button
-          *ngIf="salesSearchTerm"
-          class="icon-btn clear-search-btn"
-          (click)="clearSalesFilter('salesSearch')"
-          aria-label="Clear sales search"
-          type="button"
-        >✕</button>
-      </div>
-
-      <div class="filters-row" role="group" aria-label="Sales filter options">
-        <div class="filter-group">
-          <label for="sale-status-filter" class="filter-label">Status</label>
-          <select
-            id="sale-status-filter"
-            class="filter-select"
-            [(ngModel)]="filterSaleStatus"
-            (change)="onSalesFilterChange()"
-            aria-label="Filter by sale status"
-          >
-            <option value="">All Statuses</option>
-            <option *ngFor="let s of SALE_STATUS_OPTIONS" [value]="s">{{ s }}</option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label for="sale-stage-filter" class="filter-label">Stage</label>
-          <select
-            id="sale-stage-filter"
-            class="filter-select"
-            [(ngModel)]="filterSaleStage"
-            (change)="onSalesFilterChange()"
-            aria-label="Filter by sale stage"
-          >
-            <option value="">All Stages</option>
-            <option *ngFor="let g of SALE_STAGE_OPTIONS" [value]="g">{{ g }}</option>
-          </select>
-        </div>
-
-        <button
-          *ngIf="activeSalesFilters.length > 0"
-          class="btn btn-ghost clear-all-btn"
-          (click)="clearAllSalesFilters()"
-          type="button"
-          aria-label="Clear all active sales filters"
-        >Clear all</button>
-      </div>
-
-      <div
-        *ngIf="activeSalesFilters.length > 0"
-        class="active-filters"
-        role="list"
-        aria-label="Active sales filters"
-      >
-        <span class="filters-prefix" aria-hidden="true">Active:</span>
-        <span
-          *ngFor="let f of activeSalesFilters"
-          class="filter-chip"
-          role="listitem"
-        >
-          <span class="chip-label">{{ f.label }}</span>
-          <span class="chip-value">{{ f.value }}</span>
-          <button
-            class="chip-remove"
-            (click)="clearSalesFilter(f.key)"
-            [attr.aria-label]="'Remove ' + f.label + ' filter'"
-            type="button"
-          >✕</button>
-        </span>
-      </div>
-
-    </section>
-
-    <!-- ── Sales Loading ──────────────────────────────────────────────────── -->
-    <div
-      class="loading-state"
-      *ngIf="salesLoading"
-      role="status"
-      aria-live="polite"
-      aria-label="Loading sales records, please wait"
-    >
-      <div class="spinner" aria-hidden="true"></div>
-      <p>Loading sales…</p>
+  <section *ngIf="!isLoading && activeTab === 'rfqs'">
+    <h2>Open RFQs</h2>
+    <div class="grid" *ngIf="rfqs.length; else noRfqs">
+      <article *ngFor="let rfq of rfqs; trackBy: trackById" class="card">
+        <h3>{{ rfq.title }}</h3>
+        <p>{{ rfq.category }} • Qty: {{ rfq.quantity }}</p>
+        <p>Target: {{ rfq.targetPrice || 0 }} {{ rfq.currency || 'USD' }}</p>
+        <p>Deadline: {{ rfq.deadline || 'N/A' }}</p>
+        <button type="button" (click)="selectRfq(rfq.id)">Quote this RFQ</button>
+      </article>
     </div>
+    <ng-template #noRfqs><p>No open RFQs available for your supplier account.</p></ng-template>
 
-    <!-- ── Sales Error ────────────────────────────────────────────────────── -->
-    <div
-      class="error-state"
-      *ngIf="salesError && !salesLoading"
-      role="alert"
-      aria-live="assertive"
-    >
-      <span class="error-icon" aria-hidden="true">⚠️</span>
-      <div class="error-body">
-        <h2>Error Loading Sales</h2>
-        <p>{{ salesError }}</p>
-        <button class="btn btn-primary" (click)="loadSales()" type="button">Retry</button>
-      </div>
-    </div>
+    <form class="quote-form" (ngSubmit)="submitQuote()">
+      <h3>Submit Quote</h3>
+      <label>RFQ</label>
+      <select [(ngModel)]="quoteDraft.rfqId" name="rfqId" required>
+        <option value="" disabled>Select RFQ</option>
+        <option *ngFor="let rfq of rfqs; trackBy: trackById" [value]="rfq.id">{{ rfq.title }}</option>
+      </select>
 
-    <!-- ── Sales Table ────────────────────────────────────────────────────── -->
-    <div
-      class="table-wrapper"
-      *ngIf="!salesLoading && !salesError"
-      [attr.aria-busy]="salesLoading"
-    >
-      <div
-        class="table-scroll"
-        role="region"
-        aria-label="Sales records table, scroll horizontally if needed"
-        tabindex="0"
-      >
-        <table
-          id="sales-table"
-          class="incentives-table"
-          aria-label="My sales"
-        >
-          <caption class="table-caption">
-            Sales records.
-            <span *ngIf="filteredSales.length > 0" aria-live="polite">
-              Showing {{ filteredSales.length }} of {{ salesRecords.length }}
-              <ng-container *ngIf="activeSalesFilters.length > 0"> (filtered)</ng-container>.
-            </span>
-          </caption>
+      <label>Amount</label>
+      <input type="number" min="1" [(ngModel)]="quoteDraft.amount" name="amount" required />
 
-          <thead>
-            <tr>
-              <th scope="col" class="col-num" aria-label="Row number">#</th>
+      <label>Currency</label>
+      <input type="text" [(ngModel)]="quoteDraft.currency" name="currency" required />
 
-              <th scope="col" class="col-id" [attr.aria-sort]="getSalesAriaSort('_id')">
-                <button class="sort-btn" (click)="salesSortBy('_id')" type="button">
-                  Sale ID <span class="sort-icon" aria-hidden="true">{{ getSalesSortIcon('_id') }}</span>
-                </button>
-              </th>
+      <label>Notes</label>
+      <textarea [(ngModel)]="quoteDraft.notes" name="notes"></textarea>
 
-              <th scope="col" class="col-amount" [attr.aria-sort]="getSalesAriaSort('saleValue')">
-                <button class="sort-btn" (click)="salesSortBy('saleValue')" type="button">
-                  Value <span class="sort-icon" aria-hidden="true">{{ getSalesSortIcon('saleValue') }}</span>
-                </button>
-              </th>
+      <button type="submit" [disabled]="isSubmitting">{{ isSubmitting ? 'Submitting...' : 'Submit Quote' }}</button>
+    </form>
+  </section>
 
-              <th scope="col" class="col-status" [attr.aria-sort]="getSalesAriaSort('status')">
-                <button class="sort-btn" (click)="salesSortBy('status')" type="button">
-                  Status <span class="sort-icon" aria-hidden="true">{{ getSalesSortIcon('status') }}</span>
-                </button>
-              </th>
+  <section *ngIf="!isLoading && activeTab === 'quotes'">
+    <h2>My Submitted Quotes</h2>
+    <table *ngIf="quotes.length; else noQuotes">
+      <thead>
+        <tr><th>ID</th><th>RFQ</th><th>Amount</th><th>Status</th><th>Submitted</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let quote of quotes; trackBy: trackById">
+          <td>{{ quote.id }}</td>
+          <td>{{ quote.rfqId }}</td>
+          <td>{{ quote.amount }} {{ quote.currency }}</td>
+          <td>{{ quote.status }}</td>
+          <td>{{ quote.submittedAt || 'N/A' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #noQuotes><p>No quotes submitted yet.</p></ng-template>
+  </section>
 
-              <th scope="col" class="col-stage" [attr.aria-sort]="getSalesAriaSort('stage')">
-                <button class="sort-btn" (click)="salesSortBy('stage')" type="button">
-                  Stage <span class="sort-icon" aria-hidden="true">{{ getSalesSortIcon('stage') }}</span>
-                </button>
-              </th>
-
-              <th scope="col" class="col-user" [attr.aria-sort]="getSalesAriaSort('owner')">
-                <button class="sort-btn" (click)="salesSortBy('owner')" type="button">
-                  Owner <span class="sort-icon" aria-hidden="true">{{ getSalesSortIcon('owner') }}</span>
-                </button>
-              </th>
-
-              <th scope="col" class="col-date" [attr.aria-sort]="getSalesAriaSort('openedDate')">
-                <button class="sort-btn" (click)="salesSortBy('openedDate')" type="button">
-                  Opened <span class="sort-icon" aria-hidden="true">{{ getSalesSortIcon('openedDate') }}</span>
-                </button>
-              </th>
-
-              <th scope="col" class="col-date">Expected Close</th>
-              <th scope="col" class="col-date">Closed</th>
-            </tr>
-          </thead>
-
-          <tbody aria-live="polite" aria-relevant="additions removals">
-            <tr
-              *ngFor="let sale of filteredSales; let i = index; trackBy: trackBySaleId"
-              class="table-row"
-            >
-              <td class="col-num" data-label="#">{{ i + 1 }}</td>
-
-              <td class="col-id" data-label="Sale ID">
-                <span class="truncated" [title]="sale._id">{{ sale._id }}</span>
-              </td>
-
-              <td class="col-amount amount" data-label="Value">
-                {{ formatCurrency(sale.saleValue, sale.currency) }}
-              </td>
-
-              <td class="col-status" data-label="Status">
-                <span
-                  class="status-badge"
-                  [ngClass]="getSaleStatusClass(sale.status)"
-                  [attr.aria-label]="'Status: ' + (sale.status || 'Unknown')"
-                >{{ sale.status || '—' }}</span>
-              </td>
-
-              <td class="col-stage" data-label="Stage">{{ sale.stage || '—' }}</td>
-
-              <td class="col-user" data-label="Owner">
-                <span class="truncated" [title]="sale.owner">{{ sale.owner || '—' }}</span>
-              </td>
-
-              <td class="col-date" data-label="Opened">
-                <time [attr.datetime]="sale.openedDate">{{ formatDate(sale.openedDate) }}</time>
-              </td>
-
-              <td class="col-date" data-label="Expected Close">
-                <time [attr.datetime]="sale.expectedCloseDate">{{ formatDate(sale.expectedCloseDate) }}</time>
-              </td>
-
-              <td class="col-date" data-label="Closed">
-                <time [attr.datetime]="sale.closedDate">{{ formatDate(sale.closedDate) }}</time>
-              </td>
-            </tr>
-
-            <tr *ngIf="filteredSales.length === 0">
-              <td [attr.colspan]="SALES_COLUMN_COUNT" class="empty-cell">
-                <div class="inline-empty" role="status">
-                  <span aria-hidden="true">📭</span>
-                  <span>
-                    No sales found
-                    <ng-container *ngIf="activeSalesFilters.length > 0"> matching your filters</ng-container>.
-                  </span>
-                  <button
-                    *ngIf="activeSalesFilters.length > 0"
-                    class="btn btn-ghost"
-                    (click)="clearAllSalesFilters()"
-                    type="button"
-                  >Clear filters</button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════════════════════
-       PAYOUTS TAB
-  ════════════════════════════════════════════════════════════════════════ -->
-  <div
-    id="panel-payouts"
-    role="tabpanel"
-    aria-labelledby="tab-payouts"
-    [hidden]="activeTab !== 'payouts'"
-  >
-
-    <!-- ── Payout Filters ─────────────────────────────────────────────────── -->
-    <section class="filter-section" aria-label="Payout search and filter controls">
-
-      <div class="search-bar">
-        <span class="search-icon" aria-hidden="true">🔍</span>
-        <label for="search-input" class="sr-only">Search payouts</label>
-        <input
-          id="search-input"
-          type="search"
-          class="search-input"
-          placeholder="Search by user, rule, status…"
-          [(ngModel)]="searchTerm"
-          (ngModelChange)="onSearchChange()"
-          aria-controls="records-table"
-          aria-describedby="search-hint"
-          autocomplete="off"
-        />
-        <button
-          *ngIf="searchTerm"
-          class="icon-btn clear-search-btn"
-          (click)="clearFilter('search')"
-          aria-label="Clear search"
-          type="button"
-        >✕</button>
-      </div>
-      <span id="search-hint" class="sr-only">Searches across user ID, rule name, and status</span>
-
-      <div class="filters-row" role="group" aria-label="Payout filter options">
-        <div class="filter-group">
-          <label for="status-filter" class="filter-label">Status</label>
-          <select
-            id="status-filter"
-            class="filter-select"
-            [(ngModel)]="filterStatus"
-            (change)="onFilterChange()"
-            aria-label="Filter by payout status"
-          >
-            <option value="">All Statuses</option>
-            <option *ngFor="let s of PAYOUT_STATUS_OPTIONS" [value]="s">{{ s }}</option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label for="page-size-select" class="filter-label">Per page</label>
-          <select
-            id="page-size-select"
-            class="filter-select"
-            [(ngModel)]="pageSize"
-            (change)="onPageSizeChange()"
-            aria-label="Rows per page"
-          >
-            <option *ngFor="let size of PAGE_SIZES" [value]="size">{{ size }}</option>
-          </select>
-        </div>
-
-        <button
-          *ngIf="activeFilters.length > 0"
-          class="btn btn-ghost clear-all-btn"
-          (click)="clearAllFilters()"
-          type="button"
-          aria-label="Clear all active filters"
-        >Clear all</button>
-      </div>
-
-      <div
-        *ngIf="activeFilters.length > 0"
-        class="active-filters"
-        role="list"
-        aria-label="Active payout filters"
-      >
-        <span class="filters-prefix" aria-hidden="true">Active:</span>
-        <span
-          *ngFor="let f of activeFilters"
-          class="filter-chip"
-          role="listitem"
-        >
-          <span class="chip-label">{{ f.label }}</span>
-          <span class="chip-value">{{ f.value }}</span>
-          <button
-            class="chip-remove"
-            (click)="clearFilter(f.key)"
-            [attr.aria-label]="'Remove ' + f.label + ' filter'"
-            type="button"
-          >✕</button>
-        </span>
-      </div>
-
-    </section>
-
-    <!-- ── Payout Loading ─────────────────────────────────────────────────── -->
-    <div
-      class="loading-state"
-      *ngIf="isLoading"
-      role="status"
-      aria-live="polite"
-      aria-label="Loading payout records, please wait"
-    >
-      <div class="spinner" aria-hidden="true"></div>
-      <p>Loading payouts…</p>
-    </div>
-
-    <!-- ── Payout Error ───────────────────────────────────────────────────── -->
-    <div
-      class="error-state"
-      *ngIf="errorMessage && !isLoading"
-      role="alert"
-      aria-live="assertive"
-    >
-      <span class="error-icon" aria-hidden="true">⚠️</span>
-      <div class="error-body">
-        <h2>Error Loading Payouts</h2>
-        <p>{{ errorMessage }}</p>
-        <button class="btn btn-primary" (click)="loadPayouts()" type="button">Retry</button>
-      </div>
-    </div>
-
-    <!-- ── Payout Table ───────────────────────────────────────────────────── -->
-    <div
-      class="table-wrapper"
-      *ngIf="!isLoading && !errorMessage"
-      [attr.aria-busy]="isLoading"
-    >
-      <div
-        class="table-scroll"
-        role="region"
-        aria-label="Payout records table, scroll horizontally if needed"
-        tabindex="0"
-      >
-        <table
-          id="records-table"
-          class="incentives-table"
-          aria-labelledby="page-title"
-          aria-describedby="table-caption"
-          [attr.aria-rowcount]="totalRecords"
-        >
-          <caption id="table-caption" class="table-caption">
-            Incentive payout records.
-            <span *ngIf="totalRecords > 0" aria-live="polite">
-              Showing {{ tableRangeStart }}–{{ tableRangeEnd }} of {{ totalRecords }}
-              <ng-container *ngIf="activeFilters.length > 0"> (filtered)</ng-container>.
-            </span>
-          </caption>
-
-          <thead>
-            <tr>
-              <th scope="col" class="col-num" aria-label="Row number">#</th>
-
-              <th scope="col" class="col-id" [attr.aria-sort]="getAriaSort('_id')">
-                <button class="sort-btn" (click)="sortBy('_id')" type="button" [attr.aria-label]="getSortLabel('_id')">
-                  ID <span class="sort-icon" aria-hidden="true">{{ getSortIcon('_id') }}</span>
-                </button>
-              </th>
-
-              <th scope="col" class="col-brand" [attr.aria-sort]="getAriaSort('brandId')">
-                <button class="sort-btn" (click)="sortBy('brandId')" type="button" [attr.aria-label]="getSortLabel('brandId')">
-                  Brand <span class="sort-icon" aria-hidden="true">{{ getSortIcon('brandId') }}</span>
-                </button>
-              </th>
-
-              <th scope="col" class="col-user" [attr.aria-sort]="getAriaSort('userId')">
-                <button class="sort-btn" (click)="sortBy('userId')" type="button" [attr.aria-label]="getSortLabel('userId')">
-                  User <span class="sort-icon" aria-hidden="true">{{ getSortIcon('userId') }}</span>
-                </button>
-              </th>
-
-              <th scope="col" class="col-rule">Rule</th>
-
-              <th scope="col" class="col-amount" [attr.aria-sort]="getAriaSort('amount')">
-                <button class="sort-btn" (click)="sortBy('amount')" type="button" [attr.aria-label]="getSortLabel('amount')">
-                  Amount <span class="sort-icon" aria-hidden="true">{{ getSortIcon('amount') }}</span>
-                </button>
-              </th>
-
-              <th scope="col" class="col-status" [attr.aria-sort]="getAriaSort('status')">
-                <button class="sort-btn" (click)="sortBy('status')" type="button" [attr.aria-label]="getSortLabel('status')">
-                  Status <span class="sort-icon" aria-hidden="true">{{ getSortIcon('status') }}</span>
-                </button>
-              </th>
-
-              <th scope="col" class="col-date" [attr.aria-sort]="getAriaSort('createdAt')">
-                <button class="sort-btn" (click)="sortBy('createdAt')" type="button" [attr.aria-label]="getSortLabel('createdAt')">
-                  Created <span class="sort-icon" aria-hidden="true">{{ getSortIcon('createdAt') }}</span>
-                </button>
-              </th>
-
-              <th scope="col" class="col-date">Updated</th>
-            </tr>
-          </thead>
-
-          <tbody aria-live="polite" aria-relevant="additions removals">
-            <tr
-              *ngFor="let record of filteredRecords; let i = index; trackBy: trackById"
-              class="table-row"
-              [attr.aria-rowindex]="tableRangeStart + i + 1"
-            >
-              <td class="col-num" data-label="#">{{ tableRangeStart + i }}</td>
-
-              <td class="col-id" data-label="ID">
-                <span class="truncated" [title]="record._id">{{ record._id }}</span>
-              </td>
-
-              <td class="col-brand" data-label="Brand">{{ record.brandId || '—' }}</td>
-
-              <td class="col-user" data-label="User">
-                <span class="truncated" [title]="record.userId">{{ record.userId || '—' }}</span>
-              </td>
-
-              <td class="col-rule" data-label="Rule">{{ getRuleName(record.ruleId) }}</td>
-
-              <td class="col-amount amount" data-label="Amount">{{ formatCurrency(record.amount) }}</td>
-
-              <td class="col-status" data-label="Status">
-                <span
-                  class="status-badge"
-                  [ngClass]="getStatusClass(record.status)"
-                  [attr.aria-label]="'Status: ' + (record.status || 'Unknown')"
-                >{{ record.status || '—' }}</span>
-              </td>
-
-              <td class="col-date" data-label="Created">
-                <time [attr.datetime]="record.createdAt">{{ formatDate(record.createdAt) }}</time>
-              </td>
-
-              <td class="col-date" data-label="Updated">
-                <time [attr.datetime]="record.updatedAt">{{ formatDate(record.updatedAt) }}</time>
-              </td>
-            </tr>
-
-            <tr *ngIf="filteredRecords.length === 0">
-              <td [attr.colspan]="PAYOUTS_COLUMN_COUNT" class="empty-cell">
-                <div class="inline-empty" role="status">
-                  <span aria-hidden="true">📭</span>
-                  <span>
-                    No records found
-                    <ng-container *ngIf="activeFilters.length > 0"> matching your filters</ng-container>.
-                  </span>
-                  <button
-                    *ngIf="activeFilters.length > 0"
-                    class="btn btn-ghost"
-                    (click)="clearAllFilters()"
-                    type="button"
-                  >Clear filters</button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- ── Pagination ──────────────────────────────────────────────────── -->
-      <nav
-        class="pagination"
-        *ngIf="totalPages > 1"
-        aria-label="Payout table pagination"
-        role="navigation"
-      >
-        <button
-          class="page-btn"
-          (click)="onPageChange(1)"
-          [disabled]="currentPage === 1"
-          aria-label="Go to first page"
-          type="button"
-        >«</button>
-
-        <button
-          class="page-btn"
-          (click)="onPageChange(currentPage - 1)"
-          [disabled]="currentPage === 1"
-          aria-label="Go to previous page"
-          type="button"
-        >‹</button>
-
-        <button
-          *ngFor="let page of pageNumbers"
-          class="page-btn"
-          [class.active]="page === currentPage"
-          (click)="onPageChange(page)"
-          [attr.aria-label]="'Page ' + page"
-          [attr.aria-current]="page === currentPage ? 'page' : null"
-          type="button"
-        >{{ page }}</button>
-
-        <button
-          class="page-btn"
-          (click)="onPageChange(currentPage + 1)"
-          [disabled]="currentPage === totalPages"
-          aria-label="Go to next page"
-          type="button"
-        >›</button>
-
-        <button
-          class="page-btn"
-          (click)="onPageChange(totalPages)"
-          [disabled]="currentPage === totalPages"
-          aria-label="Go to last page"
-          type="button"
-        >»</button>
-
-        <span class="page-info" aria-live="polite" aria-atomic="true">
-          Page {{ currentPage }} of {{ totalPages }}
-        </span>
-      </nav>
-    </div>
-
-  </div>
-
+  <section *ngIf="!isLoading && activeTab === 'catalog'">
+    <h2>Catalog Snapshot</h2>
+    <ul *ngIf="catalog.length; else noCatalog">
+      <li *ngFor="let item of catalog; trackBy: trackById">
+        <strong>{{ item.name }}</strong> — {{ item.category }} ({{ item.unitPrice || 0 }} {{ item.currency || 'USD' }})
+      </li>
+    </ul>
+    <ng-template #noCatalog><p>No catalog items available.</p></ng-template>
+  </section>
 </div>
