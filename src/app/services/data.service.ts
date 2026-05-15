@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { STORAGE_CONFIG, STORAGE_KEYS, getDecodedToken } from '@opensourcekd/ng-common-libs';
 import { CatalogItem, QuoteDraft, SupplierQuote, SupplierRfq } from '../models/supplier.model';
-import { SUPPLIER_API } from './supplier-api.config';
+import { SUPPLIER_API, SUPPLIER_MFE_SOURCE } from './supplier-api.config';
 import { parseResponse, pickList } from './http-response.utils';
 
 const isSupplierQuote = (value: unknown): value is SupplierQuote => {
@@ -12,7 +12,25 @@ const isSupplierQuote = (value: unknown): value is SupplierQuote => {
     return false;
   }
   const candidate = value as Record<string, unknown>;
-  return ['id', 'rfqId', 'amount', 'currency', 'status'].every((key) => key in candidate);
+  return (
+    typeof candidate['id'] === 'string' &&
+    typeof candidate['rfqId'] === 'string' &&
+    typeof candidate['amount'] === 'number' &&
+    typeof candidate['currency'] === 'string' &&
+    typeof candidate['status'] === 'string'
+  );
+};
+
+const readSupplierIdFromToken = (): string => {
+  const decoded = getDecodedToken(STORAGE_KEYS, STORAGE_CONFIG);
+  if (!decoded) {
+    throw new Error('Decoded token was not found in session storage.');
+  }
+  const supplierId = decoded.sub as string | undefined;
+  if (!supplierId) {
+    throw new Error('Supplier ID (sub) is missing in decoded token.');
+  }
+  return supplierId;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -20,12 +38,7 @@ export class DataService {
   constructor(private readonly http: HttpClient) {}
 
   getSupplierId(): string {
-    const decoded = getDecodedToken(STORAGE_KEYS, STORAGE_CONFIG);
-    const supplierId = decoded?.sub as string | undefined;
-    if (!supplierId) {
-      throw new Error('Supplier identity is missing in session storage.');
-    }
-    return supplierId;
+    return readSupplierIdFromToken();
   }
 
   getOpenRfqs(): Observable<SupplierRfq[]> {
@@ -37,7 +50,7 @@ export class DataService {
 
   getMyQuotes(): Observable<SupplierQuote[]> {
     const params = new HttpParams().set('supplierId', this.getSupplierId());
-    return this.http.get<unknown>(`${SUPPLIER_API.quotes}/quotes`, { params }).pipe(
+    return this.http.get<unknown>(`${SUPPLIER_API.quotesBase}/quotes`, { params }).pipe(
       map((response) => pickList<SupplierQuote>(parseResponse(response), ['quotes', 'items']))
     );
   }
@@ -49,8 +62,8 @@ export class DataService {
   }
 
   submitQuote(draft: QuoteDraft): Observable<SupplierQuote> {
-    const payload = { ...draft, supplierId: this.getSupplierId(), source: 'inkramp-mfe-supplier' };
-    return this.http.post<unknown>(`${SUPPLIER_API.quotes}/${draft.rfqId}/quotes`, payload).pipe(
+    const payload = { ...draft, supplierId: this.getSupplierId(), source: SUPPLIER_MFE_SOURCE };
+    return this.http.post<unknown>(`${SUPPLIER_API.quotesBase}/${draft.rfqId}/quotes`, payload).pipe(
       map((response) => {
         const parsed = parseResponse(response);
         if (isSupplierQuote(parsed['data'])) {
@@ -59,7 +72,7 @@ export class DataService {
         if (isSupplierQuote(parsed)) {
           return parsed;
         }
-        throw new Error('Unexpected quote response from API.');
+        throw new Error('Unexpected quote response shape: missing required fields.');
       })
     );
   }

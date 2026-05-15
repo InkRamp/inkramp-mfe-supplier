@@ -1,19 +1,20 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
-import { STORAGE_KEYS } from '@opensourcekd/ng-common-libs';
+import { of } from 'rxjs';
 import { AppComponent } from './app.component';
+import { DataService } from './services/data.service';
+
+const dataServiceStub: Pick<DataService, 'getOpenRfqs' | 'getMyQuotes' | 'getCatalog'> = {
+  getOpenRfqs: () => of([]),
+  getMyQuotes: () => of([]),
+  getCatalog: () => of([])
+};
 
 describe('AppComponent', () => {
   beforeEach(async () => {
-    sessionStorage.setItem(STORAGE_KEYS.DECODED_TOKEN, JSON.stringify({ sub: 'supplier-test' }));
     await TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [provideHttpClient()]
+      providers: [{ provide: DataService, useValue: dataServiceStub }]
     }).compileComponents();
-  });
-
-  afterEach(() => {
-    sessionStorage.clear();
   });
 
   it('should create the app', () => {

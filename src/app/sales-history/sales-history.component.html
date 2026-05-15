@@ -29,20 +29,20 @@
 
     <form class="quote-form" (ngSubmit)="submitQuote()">
       <h3>Submit Quote</h3>
-      <label>RFQ</label>
-      <select [(ngModel)]="quoteDraft.rfqId" name="rfqId" required>
+      <label for="rfq-select">RFQ</label>
+      <select id="rfq-select" [(ngModel)]="quoteDraft.rfqId" name="rfqId" required>
         <option value="" disabled>Select RFQ</option>
         <option *ngFor="let rfq of rfqs; trackBy: trackById" [value]="rfq.id">{{ rfq.title }}</option>
       </select>
 
-      <label>Amount</label>
-      <input type="number" min="1" [(ngModel)]="quoteDraft.amount" name="amount" required />
+      <label for="quote-amount">Amount</label>
+      <input id="quote-amount" type="number" min="1" [(ngModel)]="quoteDraft.amount" name="amount" required />
 
-      <label>Currency</label>
-      <input type="text" [(ngModel)]="quoteDraft.currency" name="currency" required />
+      <label for="quote-currency">Currency</label>
+      <input id="quote-currency" type="text" [(ngModel)]="quoteDraft.currency" name="currency" required />
 
-      <label>Notes</label>
-      <textarea [(ngModel)]="quoteDraft.notes" name="notes"></textarea>
+      <label for="quote-notes">Notes</label>
+      <textarea id="quote-notes" [(ngModel)]="quoteDraft.notes" name="notes"></textarea>
 
       <button type="submit" [disabled]="isSubmitting">{{ isSubmitting ? 'Submitting...' : 'Submit Quote' }}</button>
     </form>

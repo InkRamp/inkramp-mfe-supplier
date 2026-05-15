@@ -5,6 +5,27 @@ import { forkJoin } from 'rxjs';
 import { DataService } from '../services/data.service';
 import { CatalogItem, QuoteDraft, SupplierQuote, SupplierRfq } from '../models/supplier.model';
 
+const validateQuoteDraft = (draft: QuoteDraft): string | null => {
+  const amount = Number(draft.amount);
+  if (!draft.rfqId) {
+    return 'Select an RFQ before submitting your quote.';
+  }
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return 'Enter a valid quote amount greater than zero.';
+  }
+  if (!draft.currency.trim()) {
+    return 'Enter a currency value.';
+  }
+  return null;
+};
+
+const getMessage = (error: unknown, fallback: string): string => {
+  if (error instanceof Error && error.message) {
+    return `${fallback} (${error.message})`;
+  }
+  return fallback;
+};
+
 @Component({
   selector: 'app-sales-history',
   standalone: true,
@@ -15,11 +36,9 @@ import { CatalogItem, QuoteDraft, SupplierQuote, SupplierRfq } from '../models/s
 export class SalesHistoryComponent implements OnInit {
   readonly tabs = ['rfqs', 'quotes', 'catalog'] as const;
   activeTab: (typeof this.tabs)[number] = 'rfqs';
-
   rfqs: SupplierRfq[] = [];
   quotes: SupplierQuote[] = [];
   catalog: CatalogItem[] = [];
-
   quoteDraft: QuoteDraft = { rfqId: '', amount: 0, currency: 'USD', notes: '' };
   selectedRfqId = '';
   isSubmitting = false;
@@ -49,12 +68,13 @@ export class SalesHistoryComponent implements OnInit {
         this.rfqs = rfqs;
         this.quotes = quotes;
         this.catalog = catalog;
-        this.selectedRfqId = rfqs[0]?.id ?? '';
-        this.quoteDraft = { ...this.quoteDraft, rfqId: this.selectedRfqId };
+        this.selectedRfqId = '';
+        this.quoteDraft = { ...this.quoteDraft, rfqId: '' };
         this.isLoading = false;
       },
-      error: () => {
-        this.error = 'Unable to load supplier workspace data.';
+      error: (error: unknown) => {
+        console.error('[SupplierWorkspace] Load failed', error);
+        this.error = getMessage(error, 'Unable to load supplier workspace data.');
         this.isLoading = false;
       }
     });
@@ -63,27 +83,30 @@ export class SalesHistoryComponent implements OnInit {
   selectRfq(rfqId: string): void {
     this.selectedRfqId = rfqId;
     this.quoteDraft = { ...this.quoteDraft, rfqId };
-    this.activeTab = 'rfqs';
     this.success = '';
   }
 
   submitQuote(): void {
-    if (!this.quoteDraft.rfqId || this.quoteDraft.amount <= 0) {
-      this.error = 'Select an RFQ and provide a valid quote amount.';
+    const validationError = validateQuoteDraft(this.quoteDraft);
+    if (validationError) {
+      this.error = validationError;
       return;
     }
     this.isSubmitting = true;
     this.error = '';
     this.success = '';
-    this.dataService.submitQuote(this.quoteDraft).subscribe({
+    const amount = Number(this.quoteDraft.amount);
+    const currency = this.quoteDraft.currency.trim();
+    this.dataService.submitQuote({ ...this.quoteDraft, amount, currency }).subscribe({
       next: (quote) => {
         this.quotes = [quote, ...this.quotes];
         this.success = 'Quote submitted successfully.';
         this.isSubmitting = false;
         this.activeTab = 'quotes';
       },
-      error: () => {
-        this.error = 'Quote submission failed. Please retry.';
+      error: (error: unknown) => {
+        console.error('[SupplierWorkspace] Quote submission failed', error);
+        this.error = getMessage(error, 'Quote submission failed. Please retry.');
         this.isSubmitting = false;
       }
     });

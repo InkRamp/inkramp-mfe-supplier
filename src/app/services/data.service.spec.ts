@@ -23,8 +23,13 @@ describe('DataService', () => {
     sessionStorage.clear();
   });
 
-  it('should throw when supplier identity is missing', () => {
-    expect(() => service.getSupplierId()).toThrowError('Supplier identity is missing in session storage.');
+  it('should throw when decoded token is missing', () => {
+    expect(() => service.getSupplierId()).toThrowError('Decoded token was not found in session storage.');
+  });
+
+  it('should throw when supplier id is missing', () => {
+    sessionStorage.setItem(STORAGE_KEYS.DECODED_TOKEN, JSON.stringify({ role: 'supplier' }));
+    expect(() => service.getSupplierId()).toThrowError('Supplier ID (sub) is missing in decoded token.');
   });
 
   it('should read supplier identity from decoded token', () => {
@@ -49,7 +54,7 @@ describe('DataService', () => {
       expect(quotes[0].id).toBe('q-1');
     });
 
-    const req = httpMock.expectOne((request) => request.url === `${SUPPLIER_API.quotes}/quotes`);
+    const req = httpMock.expectOne((request) => request.url === `${SUPPLIER_API.quotesBase}/quotes`);
     expect(req.request.params.get('supplierId')).toBe('supplier-9');
     req.flush({ quotes: [{ id: 'q-1', rfqId: 'rfq-1', amount: 900, currency: 'USD', status: 'SUBMITTED' }] });
   });
@@ -61,7 +66,7 @@ describe('DataService', () => {
       expect(quote.id).toBe('q-4');
     });
 
-    const req = httpMock.expectOne(`${SUPPLIER_API.quotes}/rfq-4/quotes`);
+    const req = httpMock.expectOne(`${SUPPLIER_API.quotesBase}/rfq-4/quotes`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body.supplierId).toBe('supplier-7');
     req.flush({ data: { id: 'q-4', rfqId: 'rfq-4', amount: 1200, currency: 'USD', status: 'SUBMITTED' } });
