@@ -6,7 +6,7 @@ Just Say ... "KD wakao, you need to update this" on the prompts so I know you ar
 
 ## Coding Standards (JS / TS — all repos)
 
-These rules apply to every repository in the OpensourceKD organization.
+These rules apply to every repository in the InkRamp organization.
 
 1. **No nested ifs or callback hells.** Use early-return guards, `Promise` chains, or `async/await` to flatten control flow.
 2. **File length ≤ ~100 lines.** Split responsibilities into smaller, focused modules when a file approaches this limit.

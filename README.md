@@ -82,12 +82,12 @@ So your Pages branch (e.g., `main` or `gh-pages`) will always have:
 ### 🧱 Typical config example
 
 ```yaml
-- name: Deploy Pokémon MFE
+- name: Deploy inkramp-mfe-supplier MFE
   uses: JamesIves/github-pages-deploy-action@v4
   with:
     branch: main
     folder: ./dist/pokemon
-    repository-name: OpensourceKD/all-mfe-builds
+    repository-name: InkRamp/all-mfe-builds
     token: ${{ secrets.PAT_TOKEN }}
     target-folder: pokemon
     clean: false
@@ -171,7 +171,7 @@ do take this angle into account as well. You see its quite possible that current
 exisiting services. Make necessary assumptions and take scenarios from bankking domain. 
 
 
-# mfe-MY_SALES
+# inkramp-mfe-supplier
 
 This micro-frontend application provides sales history and performance tracking functionality for sales executives, team leads, and administrators.
 
@@ -226,7 +226,7 @@ This MFE uses:
 ## Project Structure
 
 ```
-mfe-MY_SALES/
+inkramp-mfe-supplier/
 ├── src/
 │   ├── app/                    # Application components
 │   ├── styles/                 # Shared SCSS tokens and mixins

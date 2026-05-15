@@ -7,7 +7,7 @@ import { routes } from './app/app.routes';
 import { EventBus, AuthService, APP_CONFIG } from '@opensourcekd/ng-common-libs';
 import { bearerTokenInterceptor } from '@org/core-services';
 
-const MFE_ID = 'mfe-MY_SALES';
+const MFE_ID = 'inkramp-mfe-supplier';
 const AUTH_CALLBACK_PATH = '/i17e';
 
 // Create EventBus instance before bootstrap with MFE identifier
@@ -53,4 +53,4 @@ authCallbackPromise
       ],
     })
   )
-  .catch((err) => console.error('In bootstrap.ts of mfe-MY_SALES', err));
+  .catch((err) => console.error('In bootstrap.ts of inkramp-mfe-supplier', err));

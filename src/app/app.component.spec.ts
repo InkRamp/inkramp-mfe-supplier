@@ -16,10 +16,10 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'mfe-MY_SALES' title`, () => {
+  it(`should have the 'inkramp-mfe-supplier' title`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('mfe-MY_SALES');
+    expect(app.title).toEqual('inkramp-mfe-supplier');
   });
 
   it('should render sales history component', () => {

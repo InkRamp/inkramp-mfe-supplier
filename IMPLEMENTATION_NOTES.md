@@ -1,16 +1,16 @@
-# mfe-MY_SALES - Implementation Notes & Assumptions
+# inkramp-mfe-supplier - Implementation Notes & Assumptions
 
 ## Date: October 11, 2025
 
 ## Overview
-This document outlines the assumptions, design decisions, and implementation details for the mfe-MY_SALES micro-frontend application.
+This document outlines the assumptions, design decisions, and implementation details for the inkramp-mfe-supplier micro-frontend application.
 
 ---
 
 ## 🎯 Key Requirements Addressed
 
 ### 1. Repo-Specific Code ✅
-- Renamed all references from "pokemon" to "mfe-MY_SALES"
+- Renamed all references from "pokemon" to "inkramp-mfe-supplier"
 - Updated project naming in package.json, angular.json, webpack.config.js
 - Changed module federation name to 'mfeMySales'
 - Updated all component titles and branding
@@ -408,7 +408,7 @@ $primary-color: #ff6600;
 
 ## ✅ Checklist for Production
 
-- [x] Renamed from pokemon to mfe-MY_SALES
+- [x] Renamed from pokemon to inkramp-mfe-supplier
 - [x] RBAC implemented
 - [x] Sales history dashboard complete
 - [x] Shared design tokens created
