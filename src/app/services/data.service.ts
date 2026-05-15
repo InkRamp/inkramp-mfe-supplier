@@ -7,6 +7,14 @@ import { CatalogItem, QuoteDraft, SupplierQuote, SupplierRfq } from '../models/s
 import { SUPPLIER_API } from './supplier-api.config';
 import { parseResponse, pickList } from './http-response.utils';
 
+const isSupplierQuote = (value: unknown): value is SupplierQuote => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const candidate = value as Record<string, unknown>;
+  return ['id', 'rfqId', 'amount', 'currency', 'status'].every((key) => key in candidate);
+};
+
 @Injectable({ providedIn: 'root' })
 export class DataService {
   constructor(private readonly http: HttpClient) {}
@@ -41,16 +49,17 @@ export class DataService {
   }
 
   submitQuote(draft: QuoteDraft): Observable<SupplierQuote> {
-    const payload = {
-      ...draft,
-      supplierId: this.getSupplierId(),
-      source: 'inkramp-mfe-supplier'
-    };
+    const payload = { ...draft, supplierId: this.getSupplierId(), source: 'inkramp-mfe-supplier' };
     return this.http.post<unknown>(`${SUPPLIER_API.quotes}/${draft.rfqId}/quotes`, payload).pipe(
       map((response) => {
         const parsed = parseResponse(response);
-        const nested = parsed.data as SupplierQuote | undefined;
-        return (nested ?? (parsed as SupplierQuote));
+        if (isSupplierQuote(parsed['data'])) {
+          return parsed['data'];
+        }
+        if (isSupplierQuote(parsed)) {
+          return parsed;
+        }
+        throw new Error('Unexpected quote response from API.');
       })
     );
   }
