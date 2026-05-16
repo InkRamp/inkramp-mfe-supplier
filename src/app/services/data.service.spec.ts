@@ -86,9 +86,8 @@ describe('DataService', () => {
 
   it('should create invoice document for quote', () => {
     sessionStorage.setItem(STORAGE_KEYS.DECODED_TOKEN, JSON.stringify({ sub: 'supplier-8' }));
-    const quote = { id: 'q-8', rfqId: 'rfq-8', amount: 2222, currency: 'USD', status: 'SUBMITTED' };
 
-    service.createInvoiceDocument(quote).subscribe((document) => {
+    service.createInvoiceDocument('q-8', 'rfq-8').subscribe((document) => {
       expect(document.id).toBe('doc-8');
     });
 

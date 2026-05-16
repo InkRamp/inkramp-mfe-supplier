@@ -84,11 +84,11 @@ export class DataService {
     );
   }
 
-  createInvoiceDocument(quote: SupplierQuote): Observable<SupplierDocument> {
+  createInvoiceDocument(quoteId: string, rfqId: string): Observable<SupplierDocument> {
     const payload = {
       type: 'INVOICE',
-      quoteId: quote.id,
-      rfqId: quote.rfqId,
+      quoteId,
+      rfqId,
       supplierId: this.getSupplierId(),
       source: SUPPLIER_MFE_SOURCE
     };

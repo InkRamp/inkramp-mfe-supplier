@@ -118,12 +118,13 @@ export class SalesHistoryComponent implements OnInit {
 
   createInvoice(quote: SupplierQuote): void {
     if (this.submittingQuoteIds.has(quote.id)) {
+      this.error = 'Invoice generation is already in progress for this quote.';
       return;
     }
     this.submittingQuoteIds.add(quote.id);
     this.error = '';
     this.success = '';
-    this.dataService.createInvoiceDocument(quote).subscribe({
+    this.dataService.createInvoiceDocument(quote.id, quote.rfqId).subscribe({
       next: (document) => {
         this.documents = [document, ...this.documents];
         this.success = 'Invoice document requested successfully.';
