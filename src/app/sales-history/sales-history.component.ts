@@ -118,7 +118,7 @@ export class SalesHistoryComponent implements OnInit {
 
   createInvoice(quote: SupplierQuote): void {
     if (this.submittingQuoteIds.has(quote.id)) {
-      this.error = 'Invoice generation is already in progress for this quote.';
+      this.error = 'Invoice generation for this quote is already in progress. Please wait for completion before retrying.';
       return;
     }
     this.submittingQuoteIds.add(quote.id);
@@ -127,7 +127,7 @@ export class SalesHistoryComponent implements OnInit {
     this.dataService.createInvoiceDocument(quote.id, quote.rfqId).subscribe({
       next: (document) => {
         this.documents = [document, ...this.documents];
-        this.success = 'Invoice document requested successfully.';
+        this.success = 'Invoice document generation initiated successfully. Check the Documents tab for status.';
         this.submittingQuoteIds.delete(quote.id);
         this.activeTab = 'documents';
       },
