@@ -63,8 +63,8 @@
           <td>{{ quote.status }}</td>
           <td>{{ quote.submittedAt || 'N/A' }}</td>
           <td>
-            <button type="button" [disabled]="isDocumentSubmitting" (click)="createInvoice(quote)">
-              {{ isDocumentSubmitting ? 'Processing...' : 'Generate Invoice' }}
+            <button type="button" [disabled]="isQuoteSubmitting(quote.id)" (click)="createInvoice(quote)">
+              {{ isQuoteSubmitting(quote.id) ? 'Processing...' : 'Generate Invoice' }}
             </button>
           </td>
         </tr>

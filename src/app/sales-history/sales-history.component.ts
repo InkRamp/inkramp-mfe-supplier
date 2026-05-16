@@ -43,7 +43,7 @@ export class SalesHistoryComponent implements OnInit {
   quoteDraft: QuoteDraft = { rfqId: '', amount: 0, currency: 'USD', notes: '' };
   selectedRfqId = '';
   isSubmitting = false;
-  isDocumentSubmitting = false;
+  submittingQuoteIds = new Set<string>();
   isLoading = false;
   error = '';
   success = '';
@@ -117,22 +117,29 @@ export class SalesHistoryComponent implements OnInit {
   }
 
   createInvoice(quote: SupplierQuote): void {
-    this.isDocumentSubmitting = true;
+    if (this.submittingQuoteIds.has(quote.id)) {
+      return;
+    }
+    this.submittingQuoteIds.add(quote.id);
     this.error = '';
     this.success = '';
     this.dataService.createInvoiceDocument(quote).subscribe({
       next: (document) => {
         this.documents = [document, ...this.documents];
         this.success = 'Invoice document requested successfully.';
-        this.isDocumentSubmitting = false;
+        this.submittingQuoteIds.delete(quote.id);
         this.activeTab = 'documents';
       },
       error: (error: unknown) => {
         console.error('[SupplierWorkspace] Document creation failed', error);
         this.error = getMessage(error, 'Unable to create invoice document. Please retry.');
-        this.isDocumentSubmitting = false;
+        this.submittingQuoteIds.delete(quote.id);
       }
     });
+  }
+
+  isQuoteSubmitting(quoteId: string): boolean {
+    return this.submittingQuoteIds.has(quoteId);
   }
 
   trackById(_index: number, item: { id: string }): string {
