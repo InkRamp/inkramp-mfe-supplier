@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { STORAGE_CONFIG, STORAGE_KEYS, getDecodedToken } from '@opensourcekd/ng-common-libs';
-import { CatalogItem, QuoteDraft, SupplierQuote, SupplierRfq } from '../models/supplier.model';
+import { CatalogItem, QuoteDraft, SupplierDocument, SupplierQuote, SupplierRfq } from '../models/supplier.model';
 import { SUPPLIER_API, SUPPLIER_MFE_SOURCE } from './supplier-api.config';
 import { parseResponse, pickList } from './http-response.utils';
 
@@ -73,6 +73,33 @@ export class DataService {
           return parsed;
         }
         throw new Error('Unexpected quote response shape: missing required fields.');
+      })
+    );
+  }
+
+  getDocuments(): Observable<SupplierDocument[]> {
+    const params = new HttpParams().set('supplierId', this.getSupplierId());
+    return this.http.get<unknown>(SUPPLIER_API.documents, { params }).pipe(
+      map((response) => pickList<SupplierDocument>(parseResponse(response), ['documents', 'items']))
+    );
+  }
+
+  createInvoiceDocument(quote: SupplierQuote): Observable<SupplierDocument> {
+    const payload = {
+      type: 'INVOICE',
+      quoteId: quote.id,
+      rfqId: quote.rfqId,
+      supplierId: this.getSupplierId(),
+      source: SUPPLIER_MFE_SOURCE
+    };
+    return this.http.post<unknown>(SUPPLIER_API.documents, payload).pipe(
+      map((response) => {
+        const parsed = parseResponse(response);
+        const candidate = (parsed['data'] ?? parsed) as Partial<SupplierDocument>;
+        if (!candidate.id || !candidate.type || !candidate.status) {
+          throw new Error('Unexpected document response shape: missing required fields.');
+        }
+        return candidate as SupplierDocument;
       })
     );
   }

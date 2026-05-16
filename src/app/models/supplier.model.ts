@@ -32,3 +32,13 @@ export interface QuoteDraft {
   currency: string;
   notes?: string;
 }
+
+export interface SupplierDocument {
+  id: string;
+  type: string;
+  status: string;
+  rfqId?: string;
+  quoteId?: string;
+  createdAt?: string;
+  downloadUrl?: string;
+}

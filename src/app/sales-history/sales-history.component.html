@@ -8,6 +8,7 @@
     <button type="button" [class.active]="activeTab === 'rfqs'" (click)="setTab('rfqs')">Open RFQs</button>
     <button type="button" [class.active]="activeTab === 'quotes'" (click)="setTab('quotes')">My Quotes</button>
     <button type="button" [class.active]="activeTab === 'catalog'" (click)="setTab('catalog')">Catalog</button>
+    <button type="button" [class.active]="activeTab === 'documents'" (click)="setTab('documents')">Documents</button>
   </nav>
 
   <div class="status" *ngIf="isLoading">Loading supplier data…</div>
@@ -52,7 +53,7 @@
     <h2>My Submitted Quotes</h2>
     <table *ngIf="quotes.length; else noQuotes">
       <thead>
-        <tr><th>ID</th><th>RFQ</th><th>Amount</th><th>Status</th><th>Submitted</th></tr>
+        <tr><th>ID</th><th>RFQ</th><th>Amount</th><th>Status</th><th>Submitted</th><th>Actions</th></tr>
       </thead>
       <tbody>
         <tr *ngFor="let quote of quotes; trackBy: trackById">
@@ -61,6 +62,11 @@
           <td>{{ quote.amount }} {{ quote.currency }}</td>
           <td>{{ quote.status }}</td>
           <td>{{ quote.submittedAt || 'N/A' }}</td>
+          <td>
+            <button type="button" [disabled]="isDocumentSubmitting" (click)="createInvoice(quote)">
+              {{ isDocumentSubmitting ? 'Processing...' : 'Generate Invoice' }}
+            </button>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -75,5 +81,25 @@
       </li>
     </ul>
     <ng-template #noCatalog><p>No catalog items available.</p></ng-template>
+  </section>
+
+  <section *ngIf="!isLoading && activeTab === 'documents'">
+    <h2>Generated Documents</h2>
+    <table *ngIf="documents.length; else noDocuments">
+      <thead>
+        <tr><th>ID</th><th>Type</th><th>Status</th><th>RFQ</th><th>Quote</th><th>Created</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let document of documents; trackBy: trackById">
+          <td>{{ document.id }}</td>
+          <td>{{ document.type }}</td>
+          <td>{{ document.status }}</td>
+          <td>{{ document.rfqId || 'N/A' }}</td>
+          <td>{{ document.quoteId || 'N/A' }}</td>
+          <td>{{ document.createdAt || 'N/A' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #noDocuments><p>No generated documents yet.</p></ng-template>
   </section>
 </div>

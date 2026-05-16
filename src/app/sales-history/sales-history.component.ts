@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { DataService } from '../services/data.service';
-import { CatalogItem, QuoteDraft, SupplierQuote, SupplierRfq } from '../models/supplier.model';
+import { CatalogItem, QuoteDraft, SupplierDocument, SupplierQuote, SupplierRfq } from '../models/supplier.model';
 
 const validateQuoteDraft = (draft: QuoteDraft): string | null => {
   const amount = Number(draft.amount);
@@ -34,14 +34,16 @@ const getMessage = (error: unknown, fallback: string): string => {
   styleUrl: './sales-history.component.scss'
 })
 export class SalesHistoryComponent implements OnInit {
-  readonly tabs = ['rfqs', 'quotes', 'catalog'] as const;
+  readonly tabs = ['rfqs', 'quotes', 'catalog', 'documents'] as const;
   activeTab: (typeof this.tabs)[number] = 'rfqs';
   rfqs: SupplierRfq[] = [];
   quotes: SupplierQuote[] = [];
   catalog: CatalogItem[] = [];
+  documents: SupplierDocument[] = [];
   quoteDraft: QuoteDraft = { rfqId: '', amount: 0, currency: 'USD', notes: '' };
   selectedRfqId = '';
   isSubmitting = false;
+  isDocumentSubmitting = false;
   isLoading = false;
   error = '';
   success = '';
@@ -62,12 +64,14 @@ export class SalesHistoryComponent implements OnInit {
     forkJoin({
       rfqs: this.dataService.getOpenRfqs(),
       quotes: this.dataService.getMyQuotes(),
-      catalog: this.dataService.getCatalog()
+      catalog: this.dataService.getCatalog(),
+      documents: this.dataService.getDocuments()
     }).subscribe({
-      next: ({ rfqs, quotes, catalog }) => {
+      next: ({ rfqs, quotes, catalog, documents }) => {
         this.rfqs = rfqs;
         this.quotes = quotes;
         this.catalog = catalog;
+        this.documents = documents;
         this.selectedRfqId = '';
         this.quoteDraft = { ...this.quoteDraft, rfqId: '' };
         this.isLoading = false;
@@ -108,6 +112,25 @@ export class SalesHistoryComponent implements OnInit {
         console.error('[SupplierWorkspace] Quote submission failed', error);
         this.error = getMessage(error, 'Quote submission failed. Please retry.');
         this.isSubmitting = false;
+      }
+    });
+  }
+
+  createInvoice(quote: SupplierQuote): void {
+    this.isDocumentSubmitting = true;
+    this.error = '';
+    this.success = '';
+    this.dataService.createInvoiceDocument(quote).subscribe({
+      next: (document) => {
+        this.documents = [document, ...this.documents];
+        this.success = 'Invoice document requested successfully.';
+        this.isDocumentSubmitting = false;
+        this.activeTab = 'documents';
+      },
+      error: (error: unknown) => {
+        console.error('[SupplierWorkspace] Document creation failed', error);
+        this.error = getMessage(error, 'Unable to create invoice document. Please retry.');
+        this.isDocumentSubmitting = false;
       }
     });
   }

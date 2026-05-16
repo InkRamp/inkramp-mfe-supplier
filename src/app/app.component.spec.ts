@@ -3,10 +3,11 @@ import { of } from 'rxjs';
 import { AppComponent } from './app.component';
 import { DataService } from './services/data.service';
 
-const dataServiceStub: Pick<DataService, 'getOpenRfqs' | 'getMyQuotes' | 'getCatalog'> = {
+const dataServiceStub: Pick<DataService, 'getOpenRfqs' | 'getMyQuotes' | 'getCatalog' | 'getDocuments'> = {
   getOpenRfqs: () => of([]),
   getMyQuotes: () => of([]),
-  getCatalog: () => of([])
+  getCatalog: () => of([]),
+  getDocuments: () => of([])
 };
 
 describe('AppComponent', () => {
