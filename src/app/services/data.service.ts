@@ -42,6 +42,7 @@ const isOpenRfq = (rfq: SupplierRfq): boolean => !['closed', 'awarded'].includes
 const isOwnedQuote = (quote: SupplierQuote, supplierId: string): boolean => !quote.supplierId || quote.supplierId === supplierId;
 const sortBySubmittedAt = (left: SupplierQuote, right: SupplierQuote): number =>
   (right.submittedAt ?? '').localeCompare(left.submittedAt ?? '');
+const extractObjectMap = <T>(normalize: (value: unknown) => T | null) => map((response: unknown) => extractObject(response, normalize));
 
 @Injectable({ providedIn: 'root' })
 export class DataService {
@@ -132,5 +133,3 @@ const buildQuotePayload = (draft: QuoteDraft | QuoteReviewDraft): Record<string,
     ...(status ? { status } : {})
   };
 };
-
-const extractObjectMap = <T>(normalize: (value: unknown) => T | null) => map((response: unknown) => extractObject(response, normalize));

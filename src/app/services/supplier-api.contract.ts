@@ -7,6 +7,14 @@ const normalizeApiBase = (url: string): string => {
 
 const API_BASE = normalizeApiBase(APP_CONFIG.apiUrl);
 
+export const SUPPLIER_API_PATHS = {
+  rfqs: 'GET /v1/rfqs',
+  quoteCreate: 'POST /v1/rfqs/:rfqId/quotes',
+  quoteList: 'GET /v1/rfqs/:rfqId/quotes',
+  documents: 'GET /v1/documents',
+  catalogItems: 'GET /v1/catalog/items'
+} as const;
+
 export const SUPPLIER_API = {
   rfqs: `${API_BASE}/rfqs`,
   rfq: (id: string) => `${API_BASE}/rfqs/${id}`,

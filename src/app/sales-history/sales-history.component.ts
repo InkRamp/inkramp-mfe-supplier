@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { DataService } from '../services/data.service';
 import { CatalogItem, SupplierDocument, SupplierQuote, SupplierRfq } from '../models/supplier.model';
+import { SUPPLIER_API_PATHS } from '../services/supplier-api.contract';
 import {
   createDocumentDraft,
   createQuoteDraft,
@@ -31,6 +32,7 @@ export class SalesHistoryComponent implements OnInit {
   readonly formatStatus = formatStatus;
   readonly getRfqItemCount = getRfqItemCount;
   readonly getRfqQuantity = getRfqQuantity;
+  readonly contractPaths = SUPPLIER_API_PATHS;
   activeTab: (typeof this.tabs)[number] = 'rfqs';
   rfqs: SupplierRfq[] = [];
   quotes: SupplierQuote[] = [];
@@ -240,8 +242,8 @@ export class SalesHistoryComponent implements OnInit {
     this.isRefreshingSelection = true;
     this.dataService.getDocumentStatus(selectedDocument.id).subscribe({
       next: (status) => {
-        this.selectedDocument = mergeDocumentStatus(selectedDocument, status);
-        const updatedDocument = this.selectedDocument;
+        const updatedDocument = mergeDocumentStatus(selectedDocument, status);
+        this.selectedDocument = updatedDocument;
         this.documents = this.documents.map((document) =>
           document.id === updatedDocument.id ? updatedDocument : document
         );
