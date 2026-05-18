@@ -2,8 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AuthService } from '@opensourcekd/ng-common-libs';
-import { bearerTokenInterceptor } from '@org/core-services';
-import { ASSIGNMENT_API_V1_BASE_URL as API_URL } from '../config/assignment-api';
+import { ASSIGNMENT_API_V1_BASE_URL as API_URL, bearerTokenInterceptor } from '@org/core-services';
 
 describe('bearerTokenInterceptor', () => {
   let httpMock: HttpTestingController;

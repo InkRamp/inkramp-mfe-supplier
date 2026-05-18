@@ -10,7 +10,7 @@ import {
 } from '@angular/common/http/testing';
 import { AuthService } from '@opensourcekd/ng-common-libs';
 import { bearerTokenInterceptor } from './bearer-token.interceptor';
-import { ASSIGNMENT_API_V1_BASE_URL as API_URL } from '../../src/app/config/assignment-api';
+import { ASSIGNMENT_API_V1_BASE_URL as API_URL } from '../config/assignment-api';
 
 describe('bearerTokenInterceptor', () => {
   let http: HttpClient;

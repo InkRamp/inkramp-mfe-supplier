@@ -5,8 +5,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
 import { EventBus, AuthService, APP_CONFIG } from '@opensourcekd/ng-common-libs';
-import { bearerTokenInterceptor } from '@org/core-services';
-import { ASSIGNMENT_API_BASE_URL } from './app/config/assignment-api';
+import { ASSIGNMENT_API_BASE_URL, bearerTokenInterceptor } from '@org/core-services';
 
 const MFE_ID = 'inkramp-mfe-supplier';
 const AUTH_CALLBACK_PATH = '/i17e';

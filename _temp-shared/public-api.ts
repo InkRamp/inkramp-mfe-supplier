@@ -18,3 +18,4 @@
 
 // export { authInterceptor } from './auth.interceptor';
 export { bearerTokenInterceptor } from './interceptors/bearer-token.interceptor';
+export * from './config/assignment-api';

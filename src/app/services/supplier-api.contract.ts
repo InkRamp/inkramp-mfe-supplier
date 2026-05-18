@@ -1,4 +1,4 @@
-import { ASSIGNMENT_API_V1_BASE_URL as API_BASE } from '../config/assignment-api';
+import { ASSIGNMENT_API_V1_BASE_URL as API_BASE } from '@org/core-services';
 
 export const SUPPLIER_API_PATHS = {
   rfqs: 'GET /v1/rfqs',

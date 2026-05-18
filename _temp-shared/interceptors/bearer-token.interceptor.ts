@@ -1,7 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '@opensourcekd/ng-common-libs';
-import { ASSIGNMENT_API_V1_PREFIX } from '../../src/app/config/assignment-api';
+import { ASSIGNMENT_API_V1_PREFIX } from '../config/assignment-api';
 
 /**
  * Angular HTTP interceptor that attaches a Bearer token to every request
