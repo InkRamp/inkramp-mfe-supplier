@@ -1,12 +1,17 @@
 import { ASSIGNMENT_API_V1_BASE_URL as API_BASE } from '@org/core-services';
 
+type SupplierApiOperation = {
+  method: 'GET' | 'POST';
+  path: string;
+};
+
 export const SUPPLIER_API_PATHS = {
-  rfqs: '/v1/rfqs',
-  quoteCreate: '/v1/rfqs/:rfqId/quotes',
-  quoteList: '/v1/rfqs/:rfqId/quotes',
-  documents: '/v1/documents',
-  catalogItems: '/v1/catalog/items'
-} as const;
+  rfqs: { method: 'GET', path: '/v1/rfqs' },
+  quoteCreate: { method: 'POST', path: '/v1/rfqs/:rfqId/quotes' },
+  quoteList: { method: 'GET', path: '/v1/rfqs/:rfqId/quotes' },
+  documents: { method: 'GET', path: '/v1/documents' },
+  catalogItems: { method: 'GET', path: '/v1/catalog/items' }
+} satisfies Record<string, SupplierApiOperation>;
 
 export const SUPPLIER_API = {
   rfqs: `${API_BASE}/rfqs`,

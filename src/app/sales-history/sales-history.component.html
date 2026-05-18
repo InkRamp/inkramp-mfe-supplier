@@ -19,7 +19,7 @@
   <section *ngIf="!isLoading && activeTab === 'rfqs'" class="stack">
     <div class="section-heading">
       <h2>Supplier RFQ Inbox</h2>
-      <p>Open RFQs come from <code>{{ contractPaths.rfqs }}</code>, and the detail panel renders the exact RFQ fields returned by the contract.</p>
+      <p>Open RFQs come from <code>{{ contractPaths.rfqs.method }} {{ contractPaths.rfqs.path }}</code>, and the detail panel renders the exact RFQ fields returned by the contract.</p>
     </div>
     <div class="grid" *ngIf="rfqs.length; else noRfqs">
       <article *ngFor="let rfq of rfqs; trackBy: trackById" class="card">
@@ -45,7 +45,7 @@
     </article>
 
     <form class="quote-form" (ngSubmit)="submitQuote()">
-      <h3>Submit Quote via <code>{{ contractPaths.quoteCreate }}</code></h3>
+      <h3>Submit Quote via <code>{{ contractPaths.quoteCreate.method }} {{ contractPaths.quoteCreate.path }}</code></h3>
       <p>The selected RFQ ID fills the <code>:rfqId</code> placeholder when this quote is submitted.</p>
       <label for="rfq-select">RFQ</label>
       <select id="rfq-select" [(ngModel)]="quoteDraft.rfqId" name="rfqId" required>
@@ -72,7 +72,7 @@
   <section *ngIf="!isLoading && activeTab === 'quotes'" class="stack">
     <div class="section-heading">
       <h2>Quote Review</h2>
-      <p>Quotes are sourced from <code>{{ contractPaths.quoteList }}</code> and review uses the quote detail/update endpoints.</p>
+      <p>Quotes are sourced from <code>{{ contractPaths.quoteList.method }} {{ contractPaths.quoteList.path }}</code> and review uses the quote detail/update endpoints.</p>
     </div>
     <table *ngIf="quotes.length; else noQuotes">
       <thead>
@@ -119,7 +119,7 @@
   <section *ngIf="!isLoading && activeTab === 'documents'" class="stack">
     <div class="section-heading">
       <h2>Supplier Documents</h2>
-      <p>Document create, detail, and status flows use <code>{{ contractPaths.documents }}</code> and the related detail/status endpoints.</p>
+      <p>Document create, detail, and status flows use <code>{{ contractPaths.documents.method }} {{ contractPaths.documents.path }}</code> and the related detail/status endpoints.</p>
     </div>
 
     <form class="quote-form" (ngSubmit)="requestDocumentUpload()">
@@ -162,7 +162,7 @@
   <section *ngIf="!isLoading && activeTab === 'catalog'" class="stack">
     <div class="section-heading">
       <h2>Catalog Snapshot</h2>
-      <p>Catalog data is loaded from <code>{{ contractPaths.catalogItems }}</code>.</p>
+      <p>Catalog data is loaded from <code>{{ contractPaths.catalogItems.method }} {{ contractPaths.catalogItems.path }}</code>.</p>
     </div>
     <ul *ngIf="catalog.length; else noCatalog">
       <li *ngFor="let item of catalog; trackBy: trackById">
