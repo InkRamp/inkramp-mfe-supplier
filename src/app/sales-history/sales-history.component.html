@@ -45,7 +45,7 @@
     </article>
 
     <form class="quote-form" (ngSubmit)="submitQuote()">
-      <h3>Submit Quote via <code>POST /v1/rfqs/{rfqId}/quotes</code></h3>
+      <h3>Submit Quote via <code>POST /v1/rfqs/:rfqId/quotes</code></h3>
       <label for="rfq-select">RFQ</label>
       <select id="rfq-select" [(ngModel)]="quoteDraft.rfqId" name="rfqId" required>
         <option value="" disabled>Select RFQ</option>
@@ -71,7 +71,7 @@
   <section *ngIf="!isLoading && activeTab === 'quotes'" class="stack">
     <div class="section-heading">
       <h2>Quote Review</h2>
-      <p>Quotes are sourced from <code>GET /v1/rfqs/{rfqId}/quotes</code> and review uses the quote detail/update endpoints.</p>
+      <p>Quotes are sourced from <code>GET /v1/rfqs/:rfqId/quotes</code> and review uses the quote detail/update endpoints.</p>
     </div>
     <table *ngIf="quotes.length; else noQuotes">
       <thead>

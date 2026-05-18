@@ -236,12 +236,14 @@ export class SalesHistoryComponent implements OnInit {
       this.error = 'Select a document before refreshing status.';
       return;
     }
+    const selectedDocument = this.selectedDocument;
     this.isRefreshingSelection = true;
-    this.dataService.getDocumentStatus(this.selectedDocument.id).subscribe({
+    this.dataService.getDocumentStatus(selectedDocument.id).subscribe({
       next: (status) => {
-        this.selectedDocument = mergeDocumentStatus(this.selectedDocument as SupplierDocument, status);
+        this.selectedDocument = mergeDocumentStatus(selectedDocument, status);
+        const updatedDocument = this.selectedDocument;
         this.documents = this.documents.map((document) =>
-          document.id === this.selectedDocument?.id ? (this.selectedDocument as SupplierDocument) : document
+          document.id === updatedDocument.id ? updatedDocument : document
         );
         this.isRefreshingSelection = false;
       },

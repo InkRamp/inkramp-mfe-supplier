@@ -119,12 +119,18 @@ export class DataService {
   }
 }
 
-const buildQuotePayload = (draft: QuoteDraft | QuoteReviewDraft): Record<string, unknown> => ({
-  totalPrice: draft.totalPrice,
-  currency: draft.currency,
-  notes: draft.notes || undefined,
-  validUntil: draft.validUntil || undefined,
-  ...(typeof (draft as QuoteReviewDraft).status === 'string' ? { status: (draft as QuoteReviewDraft).status } : {})
-});
+const hasStatus = (draft: QuoteDraft | QuoteReviewDraft): draft is QuoteReviewDraft =>
+  'status' in draft && typeof draft.status === 'string';
+
+const buildQuotePayload = (draft: QuoteDraft | QuoteReviewDraft): Record<string, unknown> => {
+  const status = hasStatus(draft) ? draft.status : undefined;
+  return {
+    totalPrice: draft.totalPrice,
+    currency: draft.currency,
+    notes: draft.notes || undefined,
+    validUntil: draft.validUntil || undefined,
+    ...(status ? { status } : {})
+  };
+};
 
 const extractObjectMap = <T>(normalize: (value: unknown) => T | null) => map((response: unknown) => extractObject(response, normalize));
