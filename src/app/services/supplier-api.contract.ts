@@ -5,6 +5,9 @@ const normalizeApiBase = (url: string): string => {
   return trimmed.endsWith('/v1') ? trimmed : `${trimmed}/v1`;
 };
 
+// APP_CONFIG.apiUrl is the deploy-provided assignment API base and must resolve to the reviewed
+// Swagger/Pulumi API Gateway URL at runtime; this keeps the MFE aligned with the published contract
+// without introducing a local endpoint registry or ad-hoc api.config file.
 const API_BASE = normalizeApiBase(APP_CONFIG.apiUrl);
 
 export const SUPPLIER_API_PATHS = {

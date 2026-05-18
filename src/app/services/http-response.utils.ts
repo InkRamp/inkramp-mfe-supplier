@@ -35,5 +35,5 @@ export const extractObject = <T>(response: unknown, normalize: (value: unknown) 
   if (value) {
     return value;
   }
-  throw new Error('Unexpected response shape from API.');
+  throw new Error(`Unexpected response shape from API: ${JSON.stringify(parseResponse(response))}`);
 };

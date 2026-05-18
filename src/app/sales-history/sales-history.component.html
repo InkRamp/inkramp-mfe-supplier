@@ -19,7 +19,7 @@
   <section *ngIf="!isLoading && activeTab === 'rfqs'" class="stack">
     <div class="section-heading">
       <h2>Supplier RFQ Inbox</h2>
-      <p>Open RFQs come from <code>{{ contractPaths.rfqs }}</code> and detail panels align to the RFQ contract.</p>
+      <p>Open RFQs come from <code>{{ contractPaths.rfqs }}</code>, and the detail panel renders the exact RFQ fields returned by the contract.</p>
     </div>
     <div class="grid" *ngIf="rfqs.length; else noRfqs">
       <article *ngFor="let rfq of rfqs; trackBy: trackById" class="card">
@@ -46,6 +46,7 @@
 
     <form class="quote-form" (ngSubmit)="submitQuote()">
       <h3>Submit Quote via <code>{{ contractPaths.quoteCreate }}</code></h3>
+      <p>The selected RFQ ID fills the <code>:rfqId</code> placeholder when this quote is submitted.</p>
       <label for="rfq-select">RFQ</label>
       <select id="rfq-select" [(ngModel)]="quoteDraft.rfqId" name="rfqId" required>
         <option value="" disabled>Select RFQ</option>
