@@ -1,6 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { AuthService, APP_CONFIG } from '@opensourcekd/ng-common-libs';
+import { AuthService } from '@opensourcekd/ng-common-libs';
+import { ASSIGNMENT_API_V1_PREFIX } from '../config/assignment-api';
 
 /**
  * Angular HTTP interceptor that attaches a Bearer token to every request
@@ -21,9 +22,7 @@ export const bearerTokenInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const token = authService.getTokenSync();
 
-  const apiBase = APP_CONFIG.apiUrl.endsWith('/') ? APP_CONFIG.apiUrl : `${APP_CONFIG.apiUrl}/`;
-
-  if (!token || !req.url.startsWith(apiBase)) {
+  if (!token || !req.url.startsWith(ASSIGNMENT_API_V1_PREFIX)) {
     return next(req);
   }
 
