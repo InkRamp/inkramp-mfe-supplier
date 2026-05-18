@@ -1,1 +1,1 @@
-export { ASSIGNMENT_API_V1_BASE_URL } from '../../../_temp-shared/config/assignment-api';
+export { ASSIGNMENT_API_V1_BASE_URL } from '@temp-shared/config/assignment-api';

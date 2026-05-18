@@ -2,7 +2,8 @@
   "compileOnSave": false,
   "compilerOptions": {
     "paths": {
-      "@org/core-services": ["./_temp-shared/public-api.ts"]
+      "@org/core-services": ["./_temp-shared/public-api.ts"],
+      "@temp-shared/*": ["./_temp-shared/*"]
     },
     "outDir": "./dist/out-tsc",
     "strict": true,
