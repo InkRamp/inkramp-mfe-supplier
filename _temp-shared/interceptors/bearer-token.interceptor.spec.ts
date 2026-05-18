@@ -8,10 +8,9 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
-import { AuthService, APP_CONFIG } from '@opensourcekd/ng-common-libs';
+import { AuthService } from '@opensourcekd/ng-common-libs';
 import { bearerTokenInterceptor } from './bearer-token.interceptor';
-
-const API_URL = APP_CONFIG.apiUrl;
+import { ASSIGNMENT_API_V1_BASE_URL as API_URL } from '../config/assignment-api';
 
 describe('bearerTokenInterceptor', () => {
   let http: HttpClient;
