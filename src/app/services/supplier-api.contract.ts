@@ -1,14 +1,4 @@
-import { APP_CONFIG } from '@opensourcekd/ng-common-libs';
-
-const normalizeApiBase = (url: string): string => {
-  const trimmed = url.endsWith('/') ? url.slice(0, -1) : url;
-  return trimmed.endsWith('/v1') ? trimmed : `${trimmed}/v1`;
-};
-
-// APP_CONFIG.apiUrl is the deploy-provided assignment API base and must resolve to the reviewed
-// Swagger/Pulumi API Gateway URL at runtime; this keeps the MFE aligned with the published contract
-// without introducing a local endpoint registry or ad-hoc api.config file.
-const API_BASE = normalizeApiBase(APP_CONFIG.apiUrl);
+import { ASSIGNMENT_API_V1_BASE_URL as API_BASE } from '../config/assignment-api';
 
 export const SUPPLIER_API_PATHS = {
   rfqs: 'GET /v1/rfqs',

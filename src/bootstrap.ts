@@ -6,6 +6,7 @@ import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
 import { EventBus, AuthService, APP_CONFIG } from '@opensourcekd/ng-common-libs';
 import { bearerTokenInterceptor } from '@org/core-services';
+import { ASSIGNMENT_API_BASE_URL } from './app/config/assignment-api';
 
 const MFE_ID = 'inkramp-mfe-supplier';
 const AUTH_CALLBACK_PATH = '/i17e';
@@ -18,7 +19,7 @@ const authService = new AuthService(
   {
     domain: APP_CONFIG.auth0Domain,
     clientId: APP_CONFIG.auth0ClientId,
-    audience: APP_CONFIG.apiUrl,
+    audience: ASSIGNMENT_API_BASE_URL,
     redirectUri: `${window.location.origin}${AUTH_CALLBACK_PATH}`,
     logoutUri: `${window.location.origin}${AUTH_CALLBACK_PATH}`,
     scope: 'openid profile email',
