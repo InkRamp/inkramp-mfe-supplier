@@ -1,4 +1,4 @@
-import { ASSIGNMENT_API_V1_BASE_URL } from '../config/assignment-api';
+import { ASSIGNMENT_API_V1_BASE_URL } from '@temp-shared/config/assignment-api';
 import { SUPPLIER_API } from './supplier-api.contract';
 
 describe('SUPPLIER_API', () => {
