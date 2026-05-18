@@ -1,79 +1,175 @@
 <div class="supplier-workspace">
   <header>
     <h1>Supplier Workspace</h1>
-    <p>Manage RFQs, quotes, and catalog items from the live platform APIs.</p>
+    <p>Manage RFQs, quote reviews, documents, and catalog data from the Swagger-backed APIs.</p>
   </header>
 
   <nav class="tab-nav" aria-label="Supplier sections">
-    <button type="button" [class.active]="activeTab === 'rfqs'" (click)="setTab('rfqs')">Open RFQs</button>
-    <button type="button" [class.active]="activeTab === 'quotes'" (click)="setTab('quotes')">My Quotes</button>
+    <button type="button" [class.active]="activeTab === 'rfqs'" (click)="setTab('rfqs')">RFQ Inbox</button>
+    <button type="button" [class.active]="activeTab === 'quotes'" (click)="setTab('quotes')">Quote Review</button>
+    <button type="button" [class.active]="activeTab === 'documents'" (click)="setTab('documents')">Documents</button>
     <button type="button" [class.active]="activeTab === 'catalog'" (click)="setTab('catalog')">Catalog</button>
   </nav>
 
   <div class="status" *ngIf="isLoading">Loading supplier data…</div>
+  <div class="status" *ngIf="isRefreshingSelection">Refreshing selected detail…</div>
   <div class="status error" *ngIf="error">{{ error }}</div>
   <div class="status success" *ngIf="success">{{ success }}</div>
 
-  <section *ngIf="!isLoading && activeTab === 'rfqs'">
-    <h2>Open RFQs</h2>
+  <section *ngIf="!isLoading && activeTab === 'rfqs'" class="stack">
+    <div class="section-heading">
+      <h2>Supplier RFQ Inbox</h2>
+      <p>Open RFQs come from <code>{{ contractPaths.rfqs }}</code>, and the detail panel renders the exact RFQ fields returned by the contract.</p>
+    </div>
     <div class="grid" *ngIf="rfqs.length; else noRfqs">
       <article *ngFor="let rfq of rfqs; trackBy: trackById" class="card">
         <h3>{{ rfq.title }}</h3>
-        <p>{{ rfq.category }} • Qty: {{ rfq.quantity }}</p>
-        <p>Target: {{ rfq.targetPrice || 0 }} {{ rfq.currency || 'USD' }}</p>
-        <p>Deadline: {{ rfq.deadline || 'N/A' }}</p>
-        <button type="button" (click)="selectRfq(rfq.id)">Quote this RFQ</button>
+        <p>Status: {{ formatStatus(rfq.status) }}</p>
+        <p>Items: {{ getRfqItemCount(rfq) }} • Quantity: {{ getRfqQuantity(rfq) }}</p>
+        <p>Deadline: {{ rfq.deadlineAt || 'N/A' }}</p>
+        <button type="button" (click)="selectRfq(rfq)">Open RFQ</button>
       </article>
     </div>
-    <ng-template #noRfqs><p>No open RFQs available for your supplier account.</p></ng-template>
+    <ng-template #noRfqs><p>No supplier-visible RFQs are available right now.</p></ng-template>
+
+    <article class="detail-card" *ngIf="selectedRfq as rfq">
+      <h3>{{ rfq.title }}</h3>
+      <p>{{ rfq.description || 'No RFQ description was returned by the API.' }}</p>
+      <ul *ngIf="rfq.items.length; else noRfqItems">
+        <li *ngFor="let item of rfq.items; trackBy: trackByName">
+          <strong>{{ item.name }}</strong> — {{ item.qty }} {{ item.unit || 'units' }}
+          <span *ngIf="item.targetPrice"> • Target {{ item.targetPrice }}</span>
+        </li>
+      </ul>
+      <ng-template #noRfqItems><p>No line items were returned for this RFQ.</p></ng-template>
+    </article>
 
     <form class="quote-form" (ngSubmit)="submitQuote()">
-      <h3>Submit Quote</h3>
+      <h3>Submit Quote via <code>{{ contractPaths.quoteCreate }}</code></h3>
+      <p>The selected RFQ ID fills the <code>:rfqId</code> placeholder when this quote is submitted.</p>
       <label for="rfq-select">RFQ</label>
       <select id="rfq-select" [(ngModel)]="quoteDraft.rfqId" name="rfqId" required>
         <option value="" disabled>Select RFQ</option>
         <option *ngFor="let rfq of rfqs; trackBy: trackById" [value]="rfq.id">{{ rfq.title }}</option>
       </select>
 
-      <label for="quote-amount">Amount</label>
-      <input id="quote-amount" type="number" min="1" [(ngModel)]="quoteDraft.amount" name="amount" required />
+      <label for="quote-total">Total Price</label>
+      <input id="quote-total" type="number" min="1" [(ngModel)]="quoteDraft.totalPrice" name="totalPrice" required />
 
       <label for="quote-currency">Currency</label>
       <input id="quote-currency" type="text" [(ngModel)]="quoteDraft.currency" name="currency" required />
 
+      <label for="quote-valid-until">Valid Until</label>
+      <input id="quote-valid-until" type="datetime-local" [(ngModel)]="quoteDraft.validUntil" name="validUntil" />
+
       <label for="quote-notes">Notes</label>
       <textarea id="quote-notes" [(ngModel)]="quoteDraft.notes" name="notes"></textarea>
 
-      <button type="submit" [disabled]="isSubmitting">{{ isSubmitting ? 'Submitting...' : 'Submit Quote' }}</button>
+      <button type="submit" [disabled]="isSubmitting">{{ isSubmitting ? 'Submitting…' : 'Submit Quote' }}</button>
     </form>
   </section>
 
-  <section *ngIf="!isLoading && activeTab === 'quotes'">
-    <h2>My Submitted Quotes</h2>
+  <section *ngIf="!isLoading && activeTab === 'quotes'" class="stack">
+    <div class="section-heading">
+      <h2>Quote Review</h2>
+      <p>Quotes are sourced from <code>{{ contractPaths.quoteList }}</code> and review uses the quote detail/update endpoints.</p>
+    </div>
     <table *ngIf="quotes.length; else noQuotes">
       <thead>
-        <tr><th>ID</th><th>RFQ</th><th>Amount</th><th>Status</th><th>Submitted</th></tr>
+        <tr><th>ID</th><th>RFQ</th><th>Total</th><th>Status</th><th>Valid Until</th><th></th></tr>
       </thead>
       <tbody>
         <tr *ngFor="let quote of quotes; trackBy: trackById">
           <td>{{ quote.id }}</td>
           <td>{{ quote.rfqId }}</td>
-          <td>{{ quote.amount }} {{ quote.currency }}</td>
-          <td>{{ quote.status }}</td>
-          <td>{{ quote.submittedAt || 'N/A' }}</td>
+          <td>{{ quote.totalPrice }} {{ quote.currency }}</td>
+          <td>{{ formatStatus(quote.status) }}</td>
+          <td>{{ quote.validUntil || 'N/A' }}</td>
+          <td><button type="button" (click)="selectQuote(quote)">Review</button></td>
         </tr>
       </tbody>
     </table>
-    <ng-template #noQuotes><p>No quotes submitted yet.</p></ng-template>
+    <ng-template #noQuotes><p>No supplier quotes were returned for your RFQs.</p></ng-template>
+
+    <form class="quote-form" *ngIf="selectedQuote" (ngSubmit)="saveQuoteReview()">
+      <h3>Review Quote {{ selectedQuote.id }}</h3>
+      <label for="review-total">Total Price</label>
+      <input id="review-total" type="number" min="1" [(ngModel)]="quoteReviewDraft.totalPrice" name="reviewTotalPrice" required />
+
+      <label for="review-currency">Currency</label>
+      <input id="review-currency" type="text" [(ngModel)]="quoteReviewDraft.currency" name="reviewCurrency" required />
+
+      <label for="review-status">Status</label>
+      <select id="review-status" [(ngModel)]="quoteReviewDraft.status" name="reviewStatus" required>
+        <option value="pending">Pending</option>
+        <option value="accepted">Accepted</option>
+        <option value="rejected">Rejected</option>
+      </select>
+
+      <label for="review-valid-until">Valid Until</label>
+      <input id="review-valid-until" type="datetime-local" [(ngModel)]="quoteReviewDraft.validUntil" name="reviewValidUntil" />
+
+      <label for="review-notes">Notes</label>
+      <textarea id="review-notes" [(ngModel)]="quoteReviewDraft.notes" name="reviewNotes"></textarea>
+
+      <button type="submit" [disabled]="isSubmitting">{{ isSubmitting ? 'Saving…' : 'Save Review' }}</button>
+    </form>
   </section>
 
-  <section *ngIf="!isLoading && activeTab === 'catalog'">
-    <h2>Catalog Snapshot</h2>
+  <section *ngIf="!isLoading && activeTab === 'documents'" class="stack">
+    <div class="section-heading">
+      <h2>Supplier Documents</h2>
+      <p>Document create, detail, and status flows use <code>{{ contractPaths.documents }}</code> and the related detail/status endpoints.</p>
+    </div>
+
+    <form class="quote-form" (ngSubmit)="requestDocumentUpload()">
+      <h3>Create Upload Request</h3>
+      <label for="document-name">Document Name</label>
+      <input id="document-name" type="text" [(ngModel)]="documentDraft.name" name="documentName" required />
+
+      <label for="document-mime-type">MIME Type</label>
+      <input id="document-mime-type" type="text" [(ngModel)]="documentDraft.mimeType" name="documentMimeType" required />
+
+      <button type="submit" [disabled]="isSubmitting">{{ isSubmitting ? 'Requesting…' : 'Request Upload URL' }}</button>
+    </form>
+
+    <table *ngIf="documents.length; else noDocuments">
+      <thead>
+        <tr><th>ID</th><th>Name</th><th>Status</th><th>Processed At</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let document of documents; trackBy: trackById">
+          <td>{{ document.id }}</td>
+          <td>{{ document.name }}</td>
+          <td>{{ formatStatus(document.status) }}</td>
+          <td>{{ document.processedAt || 'N/A' }}</td>
+          <td><button type="button" (click)="selectDocument(document)">Details</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #noDocuments><p>No documents are visible for the current supplier session.</p></ng-template>
+
+    <article class="detail-card" *ngIf="selectedDocument as document">
+      <h3>{{ document.name }}</h3>
+      <p>Status: {{ formatStatus(document.status) }}</p>
+      <p>Processed At: {{ document.processedAt || 'N/A' }}</p>
+      <p *ngIf="document.mimeType">MIME Type: {{ document.mimeType }}</p>
+      <p *ngIf="document.url"><a [href]="document.url" target="_blank" rel="noreferrer">Open upload URL</a></p>
+      <button type="button" (click)="refreshDocumentStatus()">Refresh Status</button>
+    </article>
+  </section>
+
+  <section *ngIf="!isLoading && activeTab === 'catalog'" class="stack">
+    <div class="section-heading">
+      <h2>Catalog Snapshot</h2>
+      <p>Catalog data is loaded from <code>{{ contractPaths.catalogItems }}</code>.</p>
+    </div>
     <ul *ngIf="catalog.length; else noCatalog">
       <li *ngFor="let item of catalog; trackBy: trackById">
-        <strong>{{ item.name }}</strong> — {{ item.category }} ({{ item.unitPrice || 0 }} {{ item.currency || 'USD' }})
+        <strong>{{ item.name }}</strong> — {{ item.category }}
+        <span *ngIf="item.unitPrice"> • {{ item.unitPrice }} {{ item.currency || 'USD' }}</span>
       </li>
     </ul>
-    <ng-template #noCatalog><p>No catalog items available.</p></ng-template>
+    <ng-template #noCatalog><p>No catalog items are available.</p></ng-template>
   </section>
 </div>
