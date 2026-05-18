@@ -1,8 +1,7 @@
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
 
-const asObject = (value: unknown): Record<string, unknown> =>
-  (isRecord(value) ? value : {});
+const asObject = (value: unknown): Record<string, unknown> => (isRecord(value) ? value : {});
 
 export const parseResponse = (response: unknown): Record<string, unknown> => {
   const raw = asObject(response);
@@ -16,10 +15,25 @@ export const parseResponse = (response: unknown): Record<string, unknown> => {
   }
 };
 
-export const pickList = <T>(payload: Record<string, unknown>, keys: string[]): T[] => {
-  const nested = asObject(payload['data']);
-  const fromData = keys.map((key) => nested[key]).find(Array.isArray);
-  const fromRoot = keys.map((key) => payload[key]).find(Array.isArray);
-  const list = fromData ?? fromRoot;
-  return Array.isArray(list) ? (list as T[]) : [];
+const getResponseData = (response: unknown): unknown => {
+  const parsed = parseResponse(response);
+  return parsed['data'] ?? parsed;
+};
+
+export const extractArray = <T>(response: unknown, normalize: (value: unknown) => T | null): T[] => {
+  const data = getResponseData(response);
+  if (!Array.isArray(data)) {
+    return [];
+  }
+  return data
+    .map(normalize)
+    .filter((value): value is T => value !== null);
+};
+
+export const extractObject = <T>(response: unknown, normalize: (value: unknown) => T | null): T => {
+  const value = normalize(getResponseData(response));
+  if (value) {
+    return value;
+  }
+  throw new Error('Unexpected response shape from API.');
 };
