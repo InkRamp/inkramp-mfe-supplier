@@ -1,11 +1,11 @@
 import { ASSIGNMENT_API_V1_BASE_URL as API_BASE } from '@org/core-services';
 
 export const SUPPLIER_API_PATHS = {
-  rfqs: 'GET /v1/rfqs',
-  quoteCreate: 'POST /v1/rfqs/:rfqId/quotes',
-  quoteList: 'GET /v1/rfqs/:rfqId/quotes',
-  documents: 'GET /v1/documents',
-  catalogItems: 'GET /v1/catalog/items'
+  rfqs: '/v1/rfqs',
+  quoteCreate: '/v1/rfqs/:rfqId/quotes',
+  quoteList: '/v1/rfqs/:rfqId/quotes',
+  documents: '/v1/documents',
+  catalogItems: '/v1/catalog/items'
 } as const;
 
 export const SUPPLIER_API = {
