@@ -1,4 +1,4 @@
-import { ASSIGNMENT_API_V1_BASE_URL as API_BASE } from '@temp-shared/config/assignment-api';
+import { ASSIGNMENT_API_V1_BASE_URL as API_BASE } from '@org/core-services';
 
 type SupplierApiOperation = {
   method: 'GET' | 'POST';
