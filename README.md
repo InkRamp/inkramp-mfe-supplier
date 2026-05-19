@@ -18,6 +18,17 @@ Supplier micro-frontend for InkRamp procurement workflows.
 
 ## Local development
 
+### Step 1: Download the code using git clone. Go to the directory where pakage.json exists.
+```bash
+git clone git@github.com:InkRamp/inkramp-mfe-supplier.git supplier supplier
+OR
+git clone https://github.com/InkRamp/inkramp-mfe-supplier.git supplier
+
+cd supplier
+```
+
+### Step 2: Run the following command.
+
 ```bash
 npm ci
 npm start
